@@ -73,7 +73,7 @@ const RepoForm = () => {
     // Octokit.js
     // https://github.com/octokit/core.js#readme
     const octokit = new Octokit({
-      auth: import.meta.env.VITE_AUTH,
+      auth: process.env.VITE_AUTH,
     });
     try {
       await octokit.request(`DELETE /repos/{owner}/{repo}`, {
