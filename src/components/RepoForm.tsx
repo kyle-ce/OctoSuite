@@ -27,7 +27,7 @@ const RepoForm = () => {
     e.preventDefault();
     // map through inputs and delete repos
 
-    const promises = repos.map((e, i) => deleteRepo(owner, e));
+    const promises = repos.map((e, i) => deleteRepo("kyle-ce", e));
     const success: Array<string> = [];
     const errors: Array<{ repo: string; error: string }> = [];
     try {
@@ -58,7 +58,7 @@ const RepoForm = () => {
     // Octokit.js
     // https://github.com/octokit/core.js#readme
     const octokit = new Octokit({
-      auth: process.env.VITE_AUTH,
+      auth: import.meta.env.VITE_AUTH,
     });
 
     return await octokit.request("GET /user/repos", {
@@ -71,7 +71,7 @@ const RepoForm = () => {
     // Octokit.js
     // https://github.com/octokit/core.js#readme
     const octokit = new Octokit({
-      auth: process.env.VITE_AUTH,
+      auth: import.meta.env.VITE_AUTH,
     });
     try {
       await octokit.request(`DELETE /repos/{owner}/{repo}`, {
