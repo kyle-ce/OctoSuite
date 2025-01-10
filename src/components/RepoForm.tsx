@@ -27,7 +27,7 @@ const RepoForm = () => {
     e.preventDefault();
     // map through inputs and delete repos
 
-    const promises = repos.map((e, i) => deleteRepo("kyle-ce", e));
+    const promises = repos.map((e, i) => deleteRepo(owner, e));
     const success: Array<string> = [];
     const errors: Array<{ repo: string; error: string }> = [];
     try {
@@ -52,15 +52,13 @@ const RepoForm = () => {
     } catch (error) {
       console.error("Unexpected error processing deletions:", error);
     }
-
-    // alert(`Submitted Values: ${repos.join(", ")}`);
   };
 
   const getAllRepos = async () => {
     // Octokit.js
     // https://github.com/octokit/core.js#readme
     const octokit = new Octokit({
-      auth: import.meta.env.VITE_AUTH,
+      auth: process.env.VITE_AUTH,
     });
 
     return await octokit.request("GET /user/repos", {
@@ -88,7 +86,6 @@ const RepoForm = () => {
     } catch (error) {
       console.error("Error deleting repository: ", error);
       throw new Error(error.message);
-      // alert(`${repo}: \n${error}`);
     }
   };
   useEffect(() => {
