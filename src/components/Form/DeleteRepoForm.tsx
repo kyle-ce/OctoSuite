@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Input from "./Input";
 import { deleteRepo, getAllRepositories } from "../../api/repo";
-import { GoPersonFill } from "react-icons/go";
+import { GoPersonFill, GoDotFill } from "react-icons/go";
+
 import { useNavigate } from "react-router";
 import Loading from "../loading";
 
@@ -56,6 +57,7 @@ const RepoForm = ({ user }: { user: string }) => {
       setRepos((prevRepos) =>
         prevRepos.filter((repo) => !success.includes(repo))
       );
+      setSelectedItems([]);
       setIsDeleting(false);
     }
   };
@@ -92,7 +94,9 @@ const RepoForm = ({ user }: { user: string }) => {
         </p>
         <p className="flex items-center gap-1 text-xs text-black/50">
           <GoPersonFill className="text-black" />
-          {user || "Authenticate yourself"}
+          {user ||
+            "Authenticate yourself"} <GoDotFill className="text-black" />{" "}
+          {repos.length} repositories
         </p>
 
         <div className="max-h-screen pr-4 overflow-auto ">
@@ -112,7 +116,9 @@ const RepoForm = ({ user }: { user: string }) => {
         </div>
 
         <button className="px-2 py-1 mt-2 text-xs transition duration-100 bg-red-300 border border-red-500 border-solid rounded-sm hover:bg-red-300/50 hover:scale-105 hover:cursor-pointer focus:scale-105">
-          Delete
+          <span className="flex items-center justify-center gap-1">
+            Delete {!!selectedItems.length && <p>({selectedItems.length})</p>}
+          </span>
         </button>
       </form>
     </Loading>

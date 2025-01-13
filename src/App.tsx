@@ -26,16 +26,14 @@ function App() {
   };
 
   return (
-    <main className="flex justify-center h-screen">
-      <section className="w-full">
-        <Routes>
-          <Route
-            path="/"
-            element={<Login isLoading={isLoading} onClick={handleSubmit} />}
-          />
-          <Route path="/repo/delete" element={<RepoForm user={user} />} />
-        </Routes>
-      </section>
+    <main className="">
+      <Routes>
+        <Route
+          path="/"
+          element={<Login isLoading={isLoading} onClick={handleSubmit} />}
+        />
+        <Route path="/repo/delete" element={<RepoForm user={user} />} />
+      </Routes>
     </main>
   );
 }

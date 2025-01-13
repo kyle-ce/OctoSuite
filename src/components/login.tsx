@@ -20,9 +20,10 @@ const login = ({
   return (
     // https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic
     <Loading isLoading={isLoading}>
-      <div className="flex items-center justify-center h-full">
+      <div className="container mx-auto">
+        {/* Add landing page */}
         <form
-          className="p-3 overflow-auto flex flex-col justify-between border border-solid rounded-sm shadow-lg border-black/30 min-w-[350px]"
+          className="flex flex-col justify-end h-screen p-3 "
           onSubmit={handleClick}
         >
           <h1 className="flex items-center gap-1 text-base font-semibold">
