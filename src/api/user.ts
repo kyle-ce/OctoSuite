@@ -10,12 +10,13 @@ export const getUser = async (
   });
   return delay<OctokitResponse<IUser, number>>(async () => {
     try {
-      const res = await octokit.request("GET /user", {
+      const data = await octokit.request("GET /user", {
         headers: {
           "X-GitHub-Api-Version": "2022-11-28",
         },
       });
-      return res as OctokitResponse<IUser, number>;
+      console.log("User:", data);
+      return data as OctokitResponse<IUser, number>;
     } catch (error) {
       console.log("There was a problem fetching user: ", error);
       return {} as OctokitResponse<IUser, number>;

@@ -1,4 +1,6 @@
 import { Octokit } from "octokit";
+import { delay } from "../utils";
+import { OctokitResponse } from "@octokit/types";
 // Octokit.js
 // https://github.com/octokit/core.js#readme
 const octokit = new Octokit({
@@ -16,6 +18,7 @@ export const getAllRepositories = async () => {
     return names;
   } catch (error) {
     console.error("Error fetching all repositories:", error);
+    return [];
   }
 };
 
