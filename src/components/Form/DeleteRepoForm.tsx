@@ -8,31 +8,33 @@ import Loading from "../loading";
 const RepoForm = ({ user }: { user: string }) => {
   const [repos, setRepos] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<
+    { id: number; value: string }[]
+  >([]);
   const navigate = useNavigate();
 
-  const handleOnChange = (index, newValue: string) => {
+  const handleOnChange = (value: { id: number; value: string }) => {
     setSelectedItems((prev) =>
-      prev.includes(newValue)
-        ? prev.filter((item) => item !== newValue)
-        : [...prev, newValue]
+      prev.find((item) => item.value === value.value)
+        ? prev.filter((item) => item.value !== value.value)
+        : [...prev, value]
     );
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // map through inputs and delete repos
     const success: Array<string> = [];
     const errors: Array<{ repo: string; error: string }> = [];
-
+    setIsDeleting(true);
     try {
-      const promises = selectedItems.map((e, i) => deleteRepo(user, e));
+      const promises = selectedItems.map((e, i) => deleteRepo(user, e.value));
       const settledPromises = await Promise.allSettled(promises);
       settledPromises.forEach((result, i) => {
         result.status === "fulfilled"
-          ? success.push(selectedItems[i])
+          ? success.push(selectedItems[i].value)
           : errors.push({
-              repo: selectedItems[i],
+              repo: selectedItems[i].value,
               error: result.reason.message,
             });
       });
@@ -50,6 +52,11 @@ const RepoForm = ({ user }: { user: string }) => {
       }
     } catch (error) {
       console.error("Unexpected error processing deletions:", error);
+    } finally {
+      setRepos((prevRepos) =>
+        prevRepos.filter((repo) => !success.includes(repo))
+      );
+      setIsDeleting(false);
     }
   };
 
@@ -65,14 +72,12 @@ const RepoForm = ({ user }: { user: string }) => {
       setIsLoading(false);
     }
   };
-
   useEffect(() => {
-    getAllRepoistoryNames();
     if (!user) {
       navigate("/");
     }
-    console.log("selected items", selectedItems);
-  }, [selectedItems]);
+    getAllRepoistoryNames();
+  }, []);
 
   return (
     <Loading isLoading={isLoading}>
@@ -94,17 +99,19 @@ const RepoForm = ({ user }: { user: string }) => {
           {repos.map((value, i) => (
             <Input
               key={i}
+              isLoading={
+                selectedItems.find((item) => item.value === value) && isDeleting
+              }
               id={i}
               value={value}
-              onChange={({ target }) => handleOnChange(i, target.value)}
+              onChange={({ target }) =>
+                handleOnChange({ id: i, value: target.value })
+              }
             />
           ))}
         </div>
 
-        <button
-          disabled
-          className="px-2 py-1 mt-2 text-xs transition duration-100 bg-red-300 border border-red-500 border-solid rounded-sm hover:bg-red-300/50 hover:scale-105 hover:cursor-pointer focus:scale-105"
-        >
+        <button className="px-2 py-1 mt-2 text-xs transition duration-100 bg-red-300 border border-red-500 border-solid rounded-sm hover:bg-red-300/50 hover:scale-105 hover:cursor-pointer focus:scale-105">
           Delete
         </button>
       </form>

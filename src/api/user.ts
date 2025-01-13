@@ -15,10 +15,10 @@ export const getUser = async (
           "X-GitHub-Api-Version": "2022-11-28",
         },
       });
-      console.log("User:", data);
       return data as OctokitResponse<IUser, number>;
     } catch (error) {
       console.log("There was a problem fetching user: ", error);
+      alert(`There was a problem fetching user: ${error}`);
       return {} as OctokitResponse<IUser, number>;
     }
   }, 1000);

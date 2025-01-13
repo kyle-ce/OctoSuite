@@ -11,7 +11,10 @@ const Skeleton = () => {
       </div>
       <div className="flex flex-col w-full gap-4 mt-8">
         {Array.from({ length: 15 }, (_, i) => (
-          <div className="h-[15px] mx-16 rounded-sm duration-300 bg-gray-500/50 animate-pulse"></div>
+          <div
+            key={i}
+            className="h-[15px] mx-16 rounded-sm duration-300 bg-gray-500/50 animate-pulse"
+          ></div>
         ))}
         <div className="h-[15px] w-1/12 mx-16 rounded-sm duration-300 bg-gray-500/50 animate-pulse"></div>
       </div>

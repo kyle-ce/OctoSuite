@@ -1,9 +1,21 @@
 import React from "react";
+import { RotatingLines } from "react-loader-spinner";
 
-const Input = ({ value, id, onChange }) => {
+const Input = ({ value, id, onChange, isLoading }) => {
   return (
     <div className="mt-1 ">
-      <div className="relative flex w-full border-b group">
+      <div className="relative flex w-full gap-1 border-b group">
+        {isLoading && (
+          <RotatingLines
+            visible={true}
+            width="15"
+            strokeColor="gray"
+            strokeWidth="5"
+            animationDuration="0.75"
+            ariaLabel="rotating-lines-loading"
+          />
+        )}
+        {/* {isFailed && <p>X</p>} */}
         <label className="w-full text-sm text-black/80" htmlFor={`repo-${id}`}>
           {value}
         </label>

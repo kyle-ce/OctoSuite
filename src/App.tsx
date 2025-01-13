@@ -20,7 +20,6 @@ function App() {
       navigate("/repo/delete");
     } catch (error) {
       setUser("");
-      console.error("bad user data", error);
     } finally {
       setIsLoading(false);
     }
