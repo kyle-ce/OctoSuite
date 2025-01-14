@@ -3,11 +3,11 @@ import { delay } from "../utils";
 import { OctokitResponse } from "@octokit/types";
 // Octokit.js
 // https://github.com/octokit/core.js#readme
-const octokit = new Octokit({
-  auth: import.meta.env.VITE_AUTH,
-});
 
-export const getAllRepositories = async () => {
+export const getAllRepositories = async (auth) => {
+  const octokit = new Octokit({
+    auth,
+  });
   try {
     const { data } = await octokit.request("GET /user/repos", {
       headers: {
@@ -22,7 +22,10 @@ export const getAllRepositories = async () => {
   }
 };
 
-export const deleteRepo = async (owner, repo) => {
+export const deleteRepo = async (auth, owner, repo) => {
+  const octokit = new Octokit({
+    auth,
+  });
   try {
     await octokit.request(`DELETE /repos/{owner}/{repo}`, {
       accept: "application/vnd.github+json",

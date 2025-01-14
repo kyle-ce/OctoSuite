@@ -3,17 +3,17 @@ import Input from "./Input";
 import { deleteRepo, getAllRepositories } from "../../api/repo";
 import { GoPersonFill, GoDotFill } from "react-icons/go";
 
-import { useNavigate } from "react-router";
 import Loading from "../loading";
+import { useUser } from "../../utils/UserProvider";
 
-const RepoForm = ({ user }: { user: string }) => {
+const RepoForm = () => {
+  const { user, token: auth, isLoggingin } = useUser();
   const [repos, setRepos] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedItems, setSelectedItems] = useState<
     { id: number; value: string }[]
   >([]);
-  const navigate = useNavigate();
 
   const handleOnChange = (value: { id: number; value: string }) => {
     setSelectedItems((prev) =>
@@ -29,7 +29,9 @@ const RepoForm = ({ user }: { user: string }) => {
     const errors: Array<{ repo: string; error: string }> = [];
     setIsDeleting(true);
     try {
-      const promises = selectedItems.map((e, i) => deleteRepo(user, e.value));
+      const promises = selectedItems.map((e, i) =>
+        deleteRepo(auth, user, e.value)
+      );
       const settledPromises = await Promise.allSettled(promises);
       settledPromises.forEach((result, i) => {
         result.status === "fulfilled"
@@ -65,7 +67,7 @@ const RepoForm = ({ user }: { user: string }) => {
   const getAllRepoistoryNames = async () => {
     setIsLoading(true);
     try {
-      const names = await getAllRepositories();
+      const names = await getAllRepositories(auth);
       if (names) setRepos(names);
     } catch (error) {
       console.log(error);
@@ -75,29 +77,33 @@ const RepoForm = ({ user }: { user: string }) => {
     }
   };
   useEffect(() => {
-    if (!user) {
-      navigate("/");
-    }
-    getAllRepoistoryNames();
-  }, []);
+    if (user) getAllRepoistoryNames();
+  }, [user, isLoggingin]);
 
+  if (!user && !isLoggingin) {
+    return;
+  }
   return (
-    <Loading isLoading={isLoading}>
+    <Loading isLoading={isLoading || isLoggingin}>
       <form
         className="container w-full p-3 px-2 mx-auto"
         id="repos"
         onSubmit={handleSubmit}
       >
-        <h1 className="text-base font-semibold "> Delete Repos</h1>
+        <h1 className="text-base font-semibold "> Active Repositories</h1>
         <p className="mb-2 text-xs text-black/50">
           Select available repositories to delete forever
         </p>
-        <p className="flex items-center gap-1 text-xs text-black/50">
-          <GoPersonFill className="text-black" />
-          {user ||
-            "Authenticate yourself"} <GoDotFill className="text-black" />{" "}
-          {repos.length} repositories
-        </p>
+        <div className="flex justify-between pr-4 text-xs text-black/50">
+          <p className="flex items-center gap-1 ">
+            <GoPersonFill className="text-black" />
+            {user || "Authenticate yourself"}{" "}
+            <GoDotFill className="text-black" /> {repos.length} repositories
+          </p>
+          <span className="flex gap-1">
+            <input id="selectall" type="checkbox"></input>
+          </span>
+        </div>
 
         <div className="max-h-screen pr-4 overflow-auto ">
           {repos.map((value, i) => (

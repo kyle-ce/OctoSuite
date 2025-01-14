@@ -1,40 +1,18 @@
-import React, { useEffect, useState } from "react";
-import RepoForm from "./components/Form/DeleteRepoForm";
+import React from "react";
+import RepoForm from "./components/Form/RepoForm";
 import Login from "./components/Login";
-import { getUser } from "./api/user";
-import { Routes, Route, useNavigate } from "react-router";
+import { Routes, Route } from "react-router";
+import UserProvider from "./utils/UserProvider";
 
 function App() {
-  const [user, setUser] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
-
-  const handleSubmit = async (token: string) => {
-    setIsLoading(true);
-    try {
-      const {
-        data: { login },
-      } = await getUser(token);
-      if (login) setUser(login);
-      console.info("Success retreived ", login, "details");
-      navigate("/repo/delete");
-    } catch (error) {
-      setUser("");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
-    <main className="">
+    <UserProvider>
       <Routes>
-        <Route
-          path="/"
-          element={<Login isLoading={isLoading} onClick={handleSubmit} />}
-        />
-        <Route path="/repo/delete" element={<RepoForm user={user} />} />
+        <Route path="/" element={<Login />}>
+          <Route index element={<RepoForm />} />
+        </Route>
       </Routes>
-    </main>
+    </UserProvider>
   );
 }
 

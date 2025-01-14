@@ -1,30 +1,42 @@
-import React, { useState } from "react";
+import React from "react";
 import { GoPasskeyFill } from "react-icons/go";
-import Loading from "./loading";
+import { Outlet } from "react-router";
+import { useUser } from "../utils/UserProvider";
+import { getUser } from "../api/user";
 
-const login = ({
-  onClick,
-  isLoading,
-}: {
-  onClick: (token: string) => Promise<void>;
-  isLoading: boolean;
-}) => {
-  const [token, setToken] = useState("");
-  const handleClick = (e) => {
-    e.preventDefault();
-    onClick(token);
-  };
+const login = ({}: {}) => {
+  const { setUser, token, setToken, setIsLoggingin } = useUser();
+
   const handleChange = ({ target }) => {
     setToken(target.value);
   };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoggingin(true);
+    try {
+      const {
+        data: { login },
+      } = await getUser(token);
+      if (login) {
+        setUser(login);
+        setToken(token);
+      }
+      console.info("Success retreived ", login, "details");
+    } catch (error) {
+      setUser("");
+      setToken("");
+    } finally {
+      setIsLoggingin(false);
+    }
+  };
   return (
     // https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic
-    <Loading isLoading={isLoading}>
+    <>
       <div className="container mx-auto">
         {/* Add landing page */}
         <form
-          className="flex flex-col justify-end h-screen p-3 "
-          onSubmit={handleClick}
+          className="flex flex-col justify-start p-3 "
+          onSubmit={(e) => handleSubmit(e)}
         >
           <h1 className="flex items-center gap-1 text-base font-semibold">
             <GoPasskeyFill />
@@ -49,7 +61,8 @@ const login = ({
           </button>
         </form>
       </div>
-    </Loading>
+      <Outlet />
+    </>
   );
 };
 
