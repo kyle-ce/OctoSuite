@@ -4,25 +4,21 @@ import { Outlet } from "react-router";
 import { useUser } from "../utils/UserProvider";
 import { getUser } from "../api/user";
 
-const login = ({}: {}) => {
+const login = () => {
   const { setUser, token, setToken, setIsLoggingin } = useUser();
 
   const handleChange = ({ target }) => {
     setToken(target.value);
   };
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoggingin(true);
     try {
-      const {
-        data: { login },
-      } = await getUser(token);
-      if (login) {
-        setUser(login);
-        setToken(token);
-      }
-      console.info("Success retreived ", login, "details");
-    } catch (error) {
+      const { data } = await getUser(token);
+      setUser(data?.login || "");
+      setToken(data?.login ? token : "");
+      console.info("Successfully retrieved user details:", data?.login);
+    } catch {
       setUser("");
       setToken("");
     } finally {

@@ -29,8 +29,8 @@ const RepoForm = () => {
     const errors: Array<{ repo: string; error: string }> = [];
     setIsDeleting(true);
     try {
-      const promises = selectedItems.map((e, i) =>
-        deleteRepo(auth, user, e.value)
+      const promises = selectedItems.map(({ value }, i) =>
+        deleteRepo(auth, user, value)
       );
       const settledPromises = await Promise.allSettled(promises);
       settledPromises.forEach((result, i) => {
