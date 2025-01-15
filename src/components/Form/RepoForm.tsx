@@ -1,86 +1,124 @@
 import React, { useEffect, useState } from "react";
 import Input from "./Input";
-import { deleteRepo, getAllRepositories } from "../../api/repo";
+import { deleteRepo, getAllRepositoriesNames } from "../../api/repo";
 import { GoPersonFill, GoDotFill } from "react-icons/go";
 
 import Loading from "../loading";
 import { useUser } from "../../utils/UserProvider";
 
+interface IRepoItem {
+  id: number;
+  value: string;
+}
+
+interface IErrorDetails {
+  repo: string;
+  error: string;
+}
+
+const deleteSelectedRepos = async (
+  items: IRepoItem[],
+  auth: string,
+  user: string
+): Promise<{ success: string[]; errors: IErrorDetails[] }> => {
+  const success: string[] = [];
+  const errors: IErrorDetails[] = [];
+
+  const promises = items.map(({ value }) => deleteRepo(auth, user, value));
+  const settledPromises = await Promise.allSettled(promises);
+
+  settledPromises.forEach((result, i) => {
+    if (result.status === "fulfilled") {
+      success.push(items[i].value);
+    } else if (result.status === "rejected" && result.reason instanceof Error) {
+      errors.push({ repo: items[i].value, error: result.reason.message });
+    }
+  });
+
+  return { success, errors };
+};
+
 const RepoForm = () => {
   const { user, token: auth, isLoggingin } = useUser();
-  const [repos, setRepos] = useState<string[]>([]);
+  const [availableRepos, setAvailableRepos] = useState<IRepoItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [selectedItems, setSelectedItems] = useState<
-    { id: number; value: string }[]
-  >([]);
+  const [selectedItems, setSelectedItems] = useState<IRepoItem[]>([]);
 
-  const handleOnChange = (value: { id: number; value: string }) => {
+  const handleOnChange = (item: IRepoItem) => {
     setSelectedItems((prev) =>
-      prev.find((item) => item.value === value.value)
-        ? prev.filter((item) => item.value !== value.value)
-        : [...prev, value]
+      prev.find(({ value }) => value === item.value)
+        ? // unchecked
+          prev.filter(({ value }) => value !== item.value)
+        : // checked
+          [...prev, item]
     );
+  };
+
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      // Select all repositories
+      setSelectedItems(availableRepos.map(({ value }, id) => ({ id, value })));
+    } else {
+      // Deselect all repositories
+      setSelectedItems([]);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const success: Array<string> = [];
-    const errors: Array<{ repo: string; error: string }> = [];
     setIsDeleting(true);
-    try {
-      const promises = selectedItems.map(({ value }, i) =>
-        deleteRepo(auth, user, value)
-      );
-      const settledPromises = await Promise.allSettled(promises);
-      settledPromises.forEach((result, i) => {
-        result.status === "fulfilled"
-          ? success.push(selectedItems[i].value)
-          : errors.push({
-              repo: selectedItems[i].value,
-              error: result.reason.message,
-            });
-      });
-
-      // Display success and error messages
-      if (success.length > 0) {
-        alert(`Successfully deleted:\n${success.join("\n")}`);
-      }
-
-      if (errors.length > 0) {
-        const errorMessages = errors
-          .map((err) => `${err.repo}: ${err.error || "Unknown error"}`)
-          .join("\n");
-        alert(`Failed to delete:\n${errorMessages}`);
-      }
-    } catch (error) {
-      console.error("Unexpected error processing deletions:", error);
-    } finally {
-      setRepos((prevRepos) =>
-        prevRepos.filter((repo) => !success.includes(repo))
-      );
-      setSelectedItems([]);
-      setIsDeleting(false);
+    // delete selected repos
+    const { success, errors } = await deleteSelectedRepos(
+      selectedItems,
+      auth,
+      user
+    );
+    // display success/error messages
+    if (success.length) {
+      alert(`Successfully deleted:\n${success.join("\n")}`);
     }
+    if (errors.length) {
+      alert(
+        `Failed to delete:\n${errors
+          .map((err) => `${err.repo}: ${err.error}`)
+          .join("\n")}`
+      );
+    }
+    // Remove deleted repos from available repos
+    setAvailableRepos((prev) =>
+      prev.filter(({ value }) => !success.includes(value))
+    );
+    // Reset all selected items
+    setSelectedItems([]);
+    setIsDeleting(false);
   };
 
   const getAllRepoistoryNames = async () => {
     setIsLoading(true);
     try {
-      const names = await getAllRepositories(auth);
-      if (names) setRepos(names);
+      // get all repos api call
+      const names = await getAllRepositoriesNames(auth);
+      if (names)
+        setAvailableRepos(
+          names.map((repo, i) => {
+            return { value: repo, id: i };
+          })
+        );
     } catch (error) {
       console.log(error);
-      setRepos([]);
+      setAvailableRepos([]);
     } finally {
       setIsLoading(false);
     }
   };
   useEffect(() => {
+    // update repositories when user changes
     if (user) getAllRepoistoryNames();
   }, [user, isLoggingin]);
 
   if (!user && !isLoggingin) {
+    // do no show component if unauthenticated
     return;
   }
   return (
@@ -98,22 +136,29 @@ const RepoForm = () => {
           <p className="flex items-center gap-1 ">
             <GoPersonFill className="text-black" />
             {user || "Authenticate yourself"}{" "}
-            <GoDotFill className="text-black" /> {repos.length} repositories
+            <GoDotFill className="text-black" /> {availableRepos.length}{" "}
+            repositories
           </p>
           <span className="flex gap-1">
-            <input id="selectall" type="checkbox"></input>
+            <input
+              id="selectall"
+              type="checkbox"
+              onChange={handleSelectAll}
+            ></input>
           </span>
         </div>
 
         <div className="max-h-screen pr-4 overflow-auto ">
-          {repos.map((value, i) => (
+          {availableRepos.map((repo, i) => (
             <Input
               key={i}
+              checked={selectedItems.some(({ value }) => value === repo.value)}
               isLoading={
-                selectedItems.find((item) => item.value === value) && isDeleting
+                selectedItems.find(({ value }) => value === repo.value) &&
+                isDeleting
               }
               id={i}
-              value={value}
+              value={repo.value}
               onChange={({ target }) =>
                 handleOnChange({ id: i, value: target.value })
               }

@@ -4,7 +4,7 @@ import { OctokitResponse } from "@octokit/types";
 // Octokit.js
 // https://github.com/octokit/core.js#readme
 
-export const getAllRepositories = async (auth) => {
+export const getAllRepositoriesNames = async (auth) => {
   const octokit = new Octokit({
     auth,
   });

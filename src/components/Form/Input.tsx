@@ -1,7 +1,7 @@
 import React from "react";
 import { RotatingLines } from "react-loader-spinner";
 
-const Input = ({ value, id, onChange, isLoading }) => {
+const Input = ({ value, id, onChange, isLoading, checked }) => {
   return (
     <div className="mt-1 ">
       <div className="relative flex w-full gap-1 border-b group">
@@ -21,6 +21,7 @@ const Input = ({ value, id, onChange, isLoading }) => {
         </label>
         <input
           value={value}
+          checked={checked}
           onChange={onChange}
           type="checkbox"
           className="p-1 text-xs leading-5 border border-solid text-black/80"
