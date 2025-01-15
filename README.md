@@ -11,5 +11,5 @@ Currently, two official plugins are available:
 
 A easy suite of octotoolkit api to easily interact with github.
 
-[octokit.gihub.io](https://octokit.github.io/types.ts/interfaces/OctokitResponse.html)
-[octokit api docs](https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#list-public-repositories)
+- [octokit.gihub.io](https://octokit.github.io/types.ts/interfaces/OctokitResponse.html)
+- [octokit api docs](https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#list-public-repositories)
