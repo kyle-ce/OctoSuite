@@ -1,15 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Input from "./Input";
 import { deleteRepo, getAllRepositoriesNames } from "../../api/repo";
 import { GoPersonFill, GoDotFill } from "react-icons/go";
 
 import Loading from "../loading";
 import { useUser } from "../../utils/UserProvider";
-
-interface IRepoItem {
-  id: number;
-  value: string;
-}
+import Modal from "../Modal";
 
 interface IErrorDetails {
   repo: string;
@@ -39,11 +35,20 @@ const deleteSelectedRepos = async (
 };
 
 const RepoForm = () => {
-  const { user, token: auth, isLoggingin } = useUser();
-  const [availableRepos, setAvailableRepos] = useState<IRepoItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const {
+    user,
+    token: auth,
+    isLoggingin,
+    isLoading,
+    availableRepos,
+    setAvailableRepos,
+    refreshRepositories,
+  } = useUser();
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedItems, setSelectedItems] = useState<IRepoItem[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
   const handleOnChange = (item: IRepoItem) => {
     setSelectedItems((prev) =>
@@ -68,6 +73,7 @@ const RepoForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsDeleting(true);
+    closeModal();
     // delete selected repos
     const { success, errors } = await deleteSelectedRepos(
       selectedItems,
@@ -86,7 +92,7 @@ const RepoForm = () => {
       );
     }
     // Remove deleted repos from available repos
-    setAvailableRepos((prev) =>
+    setAvailableRepos((prev: IRepoItem[]) =>
       prev.filter(({ value }) => !success.includes(value))
     );
     // Reset all selected items
@@ -94,40 +100,18 @@ const RepoForm = () => {
     setIsDeleting(false);
   };
 
-  const getAllRepoistoryNames = async () => {
-    setIsLoading(true);
-    try {
-      // get all repos api call
-      const names = await getAllRepositoriesNames(auth);
-      if (names)
-        setAvailableRepos(
-          names.map((repo, i) => {
-            return { value: repo, id: i };
-          })
-        );
-    } catch (error) {
-      console.log(error);
-      setAvailableRepos([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
   useEffect(() => {
     // update repositories when user changes
-    if (user) getAllRepoistoryNames();
+    if (user) refreshRepositories(auth);
   }, [user, isLoggingin]);
 
   if (!user && !isLoggingin) {
-    // do no show component if unauthenticated
+    // do not show component if unauthenticated
     return;
   }
   return (
     <Loading isLoading={isLoading || isLoggingin}>
-      <form
-        className="container w-full p-3 px-2 mx-auto"
-        id="repos"
-        onSubmit={handleSubmit}
-      >
+      <form className="container w-full p-3 px-2 mx-auto" id="repos">
         <h1 className="text-base font-semibold "> Active Repositories</h1>
         <p className="mb-2 text-xs text-black/50">
           Select available repositories to delete forever
@@ -166,11 +150,44 @@ const RepoForm = () => {
           ))}
         </div>
 
-        <button className="px-2 py-1 mt-2 text-xs transition duration-100 bg-red-300 border border-red-500 border-solid rounded-sm hover:bg-red-300/50 hover:scale-105 hover:cursor-pointer focus:scale-105">
+        <button
+          onClick={openModal}
+          type="button"
+          disabled={!selectedItems.length}
+          className={`px-2 py-1 mt-2 text-xs text-white transition duration-100 border border-solid rounded-sm ${
+            !selectedItems.length
+              ? "bg-gray-300 border-gray-300 cursor-not-allowed"
+              : "bg-red-500 border-red-500 hover:bg-red-300 hover:scale-105 hover:cursor-pointer focus:scale-105"
+          }`}
+        >
           <span className="flex items-center justify-center gap-1">
             Delete {!!selectedItems.length && <p>({selectedItems.length})</p>}
           </span>
         </button>
+        <Modal isOpen={isModalOpen} onClose={closeModal}>
+          <div className="flex flex-col items-center justify-center">
+            <h1 className="text-lg font-bold text-center ">
+              Delete {selectedItems.length} Repositories
+            </h1>
+            <p className="text-xs text-black/50">
+              Are you sure you want to continue this action can not be undone
+            </p>
+            <div className="flex justify-center gap-2 mt-4">
+              <button
+                onClick={handleSubmit}
+                className="px-4 py-2 text-xs font-semibold text-white bg-red-500 rounded hover:bg-red-300 hover:scale-105"
+              >
+                Delete
+              </button>
+              <button
+                onClick={closeModal}
+                className="px-4 py-2 text-xs font-semibold bg-gray-200 rounded text-black/50 hover:bg-gray-300 hover:scale-105"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </Modal>
       </form>
     </Loading>
   );
