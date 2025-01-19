@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import Input from "./Input";
-import { deleteRepo, getAllRepositoriesNames } from "../../api/repo";
+import { deleteRepo } from "../../api/repo";
 import { GoPersonFill, GoDotFill } from "react-icons/go";
 
 import Loading from "../loading";
 import { useUser } from "../../utils/UserProvider";
 import Modal from "../Modal";
+import { GoAlert } from "react-icons/go";
 
 interface IErrorDetails {
   repo: string;
@@ -47,6 +48,8 @@ const RepoForm = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedItems, setSelectedItems] = useState<IRepoItem[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isValid, setIsValid] = useState(false);
+
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
@@ -98,6 +101,16 @@ const RepoForm = () => {
     // Reset all selected items
     setSelectedItems([]);
     setIsDeleting(false);
+  };
+
+  const handleValidation = ({ target }) => {
+    // validate input matches "{owner}" using regex
+    const regex = new RegExp(user, "i");
+    console.log(target.value, !regex.test(target.value));
+    if (!regex.test(target.value)) {
+      return setIsValid(false);
+    }
+    return setIsValid(true);
   };
 
   useEffect(() => {
@@ -165,27 +178,45 @@ const RepoForm = () => {
           </span>
         </button>
         <Modal isOpen={isModalOpen} onClose={closeModal}>
-          <div className="flex flex-col items-center justify-center">
-            <h1 className="text-lg font-bold text-center ">
-              Delete {selectedItems.length} Repositories
-            </h1>
-            <p className="text-xs text-black/50">
-              Are you sure you want to continue this action can not be undone
+          <h1 className="mb-2 text-lg font-semibold text-center text-gray-800">
+            Delete {selectedItems.length} Repositories
+          </h1>
+          <p className="mb-4 text-sm text-center text-gray-600">
+            Are you sure you want to continue?
+          </p>
+          <p className="flex items-center justify-center gap-2 p-3 text-xs font-semibold text-center text-orange-700 capitalize bg-yellow-100 border border-yellow-400 rounded-md shadow-sm">
+            <GoAlert className="text-xs text-orange-700" />
+            This action cannot be undone
+          </p>
+          <input
+            onChange={handleValidation}
+            className="w-full p-3 mt-4 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            type="text"
+            placeholder={user}
+          />
+          {!isValid && (
+            <p className="mt-2 text-xs text-red-500">
+              Please enter your username to continue
             </p>
-            <div className="flex justify-center gap-2 mt-4">
-              <button
-                onClick={handleSubmit}
-                className="px-4 py-2 text-xs font-semibold text-white bg-red-500 rounded hover:bg-red-300 hover:scale-105"
-              >
-                Delete
-              </button>
-              <button
-                onClick={closeModal}
-                className="px-4 py-2 text-xs font-semibold bg-gray-200 rounded text-black/50 hover:bg-gray-300 hover:scale-105"
-              >
-                Cancel
-              </button>
-            </div>
+          )}
+          <div className="flex justify-center gap-4 mt-6">
+            <button
+              disabled={!isValid}
+              onClick={handleSubmit}
+              className={`px-6 py-3 text-xs font-semibold rounded-md transition duration-200 ${
+                !isValid
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "text-white bg-red-500 hover:bg-red-400 focus:ring-2 focus:ring-red-500"
+              }`}
+            >
+              Delete
+            </button>
+            <button
+              onClick={closeModal}
+              className="px-6 py-3 text-xs font-semibold text-gray-700 transition duration-200 bg-gray-200 rounded-md hover:bg-gray-300"
+            >
+              Cancel
+            </button>
           </div>
         </Modal>
       </form>
