@@ -4,6 +4,10 @@ interface IUserPlan {
   space: number;
   private_repos: number;
 }
+interface IRepoItem {
+  id: number;
+  value: string;
+}
 
 interface IBaseUser {
   login: string;

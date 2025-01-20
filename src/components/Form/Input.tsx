@@ -4,7 +4,20 @@ import { RotatingLines } from "react-loader-spinner";
 const Input = ({ value, id, onChange, isLoading, checked }) => {
   return (
     <div className="mt-1 ">
-      <div className="relative flex w-full gap-1 border-b group">
+      <div className="relative flex w-full gap-4 border-b group">
+        <input
+          value={value}
+          checked={checked}
+          onChange={onChange}
+          type="checkbox"
+          className="p-1 text-xs leading-5 border border-solid text-black/80"
+          id={`repo-${id}`}
+          placeholder="https://github.com/user/repo.git"
+        />
+        <label className="w-full text-sm text-black/80" htmlFor={`repo-${id}`}>
+          {value}
+        </label>
+
         {isLoading && (
           <RotatingLines
             visible={true}
@@ -16,18 +29,6 @@ const Input = ({ value, id, onChange, isLoading, checked }) => {
           />
         )}
         {/* {isFailed && <p>X</p>} */}
-        <label className="w-full text-sm text-black/80" htmlFor={`repo-${id}`}>
-          {value}
-        </label>
-        <input
-          value={value}
-          checked={checked}
-          onChange={onChange}
-          type="checkbox"
-          className="p-1 text-xs leading-5 border border-solid text-black/80"
-          id={`repo-${id}`}
-          placeholder="https://github.com/user/repo.git"
-        />
       </div>
     </div>
   );
