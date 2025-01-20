@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import Input from "./Input";
 import { deleteRepo } from "../../api/repo";
-import { GoPersonFill, GoDotFill } from "react-icons/go";
+import { GoPersonFill, GoDotFill, GoSync } from "react-icons/go";
 import Loading from "../loading";
 import { useUser } from "../../utils/UserProvider";
 import Modal from "../Modal";
 import { GoAlert } from "react-icons/go";
+import useThrottle from "../../hooks/useThrottle";
 
 interface IErrorDetails {
   repo: string;
@@ -111,10 +112,14 @@ const RepoForm = () => {
     }
     return setIsValid(true);
   };
+  const throttleRefresh = useThrottle(async () => {
+    refreshRepositories(auth);
+    console.log("Refreshing repositories...");
+  }, 3000);
 
   useEffect(() => {
     // update repositories when user changes
-    if (user) refreshRepositories(auth);
+    if (user) throttleRefresh();
   }, [user, isLoggingin]);
 
   if (!user && !isLoggingin) {
@@ -125,23 +130,30 @@ const RepoForm = () => {
     <Loading isLoading={isLoading || isLoggingin}>
       <form className="container w-full p-3 px-2 mx-auto" id="repos">
         <h1 className="text-base font-semibold "> Active Repositories</h1>
-        <p className="mb-2 text-xs text-black/50">
+
+        {/* <p className="mb-2 text-xs text-black/50">
           Select available repositories to delete forever
-        </p>
-        <div className="flex justify-between pr-4 text-xs text-black/50">
-          <p className="flex items-center gap-1 ">
-            <GoPersonFill className="text-black" />
-            {user || "Authenticate yourself"}{" "}
-            <GoDotFill className="text-black" /> {availableRepos.length}{" "}
-            repositories
-          </p>
-          <span className="flex gap-1">
+        </p> */}
+        <div className="flex items-center justify-between mt-2">
+          <div className="flex items-center gap-4 ">
             <input
               id="selectall"
               type="checkbox"
               onChange={handleSelectAll}
             ></input>
-          </span>
+            <p className="flex items-center gap-1 pr-4 text-xs text-black/50">
+              <GoPersonFill className="text-black" />
+              {user} <GoDotFill className="text-black" />{" "}
+              {availableRepos.length} repositories
+            </p>
+          </div>
+          <button
+            onClick={throttleRefresh}
+            type="button"
+            className="p-2 text-xs text-white transition duration-100 border-solid rounded-full hover:bg-gray-300 hover:scale-105 hover:cursor-pointer focus:scale-105"
+          >
+            <GoSync className="text-black" />
+          </button>
         </div>
 
         <div className="max-h-screen pr-4 overflow-auto ">
@@ -177,28 +189,32 @@ const RepoForm = () => {
           </span>
         </button>
         <Modal isOpen={isModalOpen} onClose={closeModal}>
-          <h1 className="mb-2 text-lg font-semibold text-center text-gray-800">
-            Delete {selectedItems.length} Repositories
+          <h1 className="mb-2 text-base font-semibold text-center text-gray-800">
+            Delete Selected Repositories ({selectedItems.length})
           </h1>
-          <p className="mb-4 text-sm text-center text-gray-600">
-            Are you sure you want to continue?
-          </p>
-          <p className="flex items-center justify-center gap-2 p-3 text-xs font-semibold text-center text-orange-700 capitalize bg-yellow-100 border border-yellow-400 rounded-md shadow-sm">
-            <GoAlert className="text-xs text-orange-700" />
-            This action cannot be undone
-          </p>
-          <input
-            onChange={handleValidation}
-            className="w-full p-3 mt-4 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            type="text"
-            placeholder={user}
-          />
+          <div className="flex flex-col gap-2 ">
+            <p className="flex items-center justify-center gap-1 text-sm text-center text-gray-600 bg-red-100 rounded-md">
+              <GoAlert className="text-xs text-red-500 " />
+              This action cannot be undone
+            </p>
+            {/* <p className="flex items-center justify-center gap-2 p-3 text-xs font-semibold text-center text-orange-700 capitalize bg-yellow-100 border border-yellow-400 rounded-full shadow-sm ">
+              <GoAlert className="text-xs text-orange-700" />
+              This action cannot be undone
+            </p> */}
+            <input
+              onChange={handleValidation}
+              className="w-full p-3 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              type="text"
+              placeholder={user}
+            />
+          </div>
           {!isValid && (
-            <p className="mt-2 text-xs text-red-500">
+            <p className="text-xs text-red-500 transition duration-100 ease-in-out ">
               Please enter your username to continue
             </p>
           )}
-          <div className="flex justify-center gap-4 mt-6">
+
+          <div className="flex justify-end gap-4 mt-6">
             <button
               disabled={!isValid}
               onClick={handleSubmit}
@@ -209,12 +225,6 @@ const RepoForm = () => {
               }`}
             >
               Delete
-            </button>
-            <button
-              onClick={closeModal}
-              className="px-6 py-3 text-xs font-semibold text-gray-700 transition duration-200 bg-gray-200 rounded-md hover:bg-gray-300"
-            >
-              Cancel
             </button>
           </div>
         </Modal>

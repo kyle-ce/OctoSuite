@@ -35,40 +35,7 @@ const login = () => {
       setIsLoggingin(false);
     }
   };
-  const throttleRefresh = useThrottle(async () => {
-    refreshRepositories(token);
-    console.log("Refreshing repositories...");
-  }, 3000);
 
-  useEffect(() => {
-    if (!user) return;
-    const handleTouchStart = (e) => {
-      setStartY(e.touches[0].clientY);
-    };
-
-    const handleTouchMove = (e) => {
-      const currentY = e.touches[0].clientY;
-      if (pullDownRef.current?.scrollTop === 0 && currentY - startY > 50) {
-        throttleRefresh();
-      }
-    };
-    const handleWheel = (e) => {
-      if (pullDownRef.current?.scrollTop === 0 && e.deltaY < 0) {
-        throttleRefresh();
-      }
-    };
-
-    const container = pullDownRef.current;
-    container?.addEventListener("touchstart", handleTouchStart);
-    container?.addEventListener("touchmove", handleTouchMove);
-    container?.addEventListener("wheel", handleWheel);
-
-    return () => {
-      container?.removeEventListener("touchstart", handleTouchStart);
-      container?.removeEventListener("touchmove", handleTouchMove);
-      container?.removeEventListener("wheel", handleWheel);
-    };
-  }, [startY, user]);
   return (
     // https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic
     <div
