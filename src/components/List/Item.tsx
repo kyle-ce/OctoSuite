@@ -1,7 +1,7 @@
 import React from "react";
 import { RotatingLines } from "react-loader-spinner";
 
-const Input = ({ value, id, onChange, isLoading, checked }) => {
+const Item = ({ value, id, onChange, isLoading, checked }) => {
   return (
     <div className="mt-1 ">
       <div className="relative flex w-full gap-4 border-b group">
@@ -34,4 +34,4 @@ const Input = ({ value, id, onChange, isLoading, checked }) => {
   );
 };
 
-export default Input;
+export default Item;

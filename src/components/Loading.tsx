@@ -1,6 +1,6 @@
 import React from "react";
 import { RotatingLines } from "react-loader-spinner";
-import Skeleton from "./Form/Skeleton";
+import Skeleton from "./List/Skeleton";
 
 const Loading = ({
   isLoading,

@@ -1,10 +1,13 @@
 import { useState, useCallback } from "react";
-import { IRepoItem } from "../types";
 import { getAllRepositoriesNames, deleteRepo } from "../api/repo";
 
 interface IErrorDetails {
   repo: string;
   error: string;
+}
+export interface IRepoItem {
+  id: number;
+  value: string;
 }
 
 export const deleteSelectedRepos = async (
@@ -29,13 +32,11 @@ export const deleteSelectedRepos = async (
   return { success, errors };
 };
 
-const useListData = (auth: string, user: string) => {
+const useManageRepo = (auth: string, user: string) => {
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState<IRepoItem[]>([]);
-  const [selectedItems, setSelectedItems] = useState<IRepoItem[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isValid, setIsValid] = useState(true);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -52,69 +53,60 @@ const useListData = (auth: string, user: string) => {
     }
   }, [auth]);
 
-  const toggleSelect = useCallback((item: IRepoItem) => {
-    setSelectedItems((prevSelected) =>
-      prevSelected.some((selected) => selected.id === item.id)
-        ? prevSelected.filter((selected) => selected.id !== item.id)
-        : [...prevSelected, item]
-    );
-  }, []);
-
-  const openModal = useCallback(() => setIsModalOpen(true), []);
-  const closeModal = useCallback(() => setIsModalOpen(false), []);
-  const handleValidation = (value: string) => {
-    // validate input matches "{owner}" using regex
-    const regex = new RegExp(user, "i");
-    console.log(value, !regex.test(value));
-    if (!regex.test(value)) {
-      return setIsValid(false);
-    }
-    return setIsValid(true);
-  };
-
-  const deleteSelectedData = useCallback(async () => {
-    setIsDeleting(true);
-    const { success, errors } = await deleteSelectedRepos(
-      selectedItems,
-      auth,
-      user
-    );
-    // display success/error messages
-    if (success.length) {
-      alert(`Successfully deleted:\n${success.join("\n")}`);
-    }
-    if (errors.length) {
-      alert(
-        `Failed to delete:\n${errors
-          .map((err) => `${err.repo}: ${err.error}`)
-          .join("\n")}`
+  const deleteSelectedData = useCallback(
+    async (selectedItems) => {
+      setIsDeleting(true);
+      const { success, errors } = await deleteSelectedRepos(
+        selectedItems,
+        auth,
+        user
       );
-    }
-    // Remove deleted repos from available repos
-    setData((prev: IRepoItem[]) =>
-      prev.filter(({ value }) => !success.includes(value))
-    );
-    // Reset all selected items
-    setSelectedItems([]);
-    setIsDeleting(false);
-    closeModal();
-  }, [selectedItems, auth, user, closeModal]);
+      // display success/error messages
+      if (success.length) {
+        alert(`Successfully deleted:\n${success.join("\n")}`);
+      }
+      if (errors.length) {
+        alert(
+          `Failed to delete:\n${errors
+            .map((err) => `${err.repo}: ${err.error}`)
+            .join("\n")}`
+        );
+      }
+      // Remove deleted repos from available repos
+      setData((prev: IRepoItem[]) =>
+        prev.filter(({ value }) => !success.includes(value))
+      );
+      // Reset all selected items
+      setIsDeleting(false);
+    },
+    [auth, user]
+  );
+
+  //   const toggleSelect = useCallback((item: IRepoItem) => {
+  //     setSelectedItems((prevSelected) =>
+  //       prevSelected.some((selected) => selected.id === item.id)
+  //         ? prevSelected.filter((selected) => selected.id !== item.id)
+  //         : [...prevSelected, item]
+  //     );
+  //   }, []);
+
+  //   const handleValidation = (value: string) => {
+  //     // validate input matches "{owner}" using regex
+  //     const regex = new RegExp(user, "i");
+  //     console.log(value, !regex.test(value));
+  //     if (!regex.test(value)) {
+  //       return setIsValid(false);
+  //     }
+  //     return setIsValid(true);
+  //   };
 
   return {
     data,
     isLoading,
-    selectedItems,
-    setSelectedItems,
-    isModalOpen,
     isDeleting,
     fetchData,
-    toggleSelect,
-    openModal,
-    closeModal,
-    isValid,
-    handleValidation,
     deleteSelectedData,
   };
 };
 
-export default useListData;
+export default useManageRepo;
