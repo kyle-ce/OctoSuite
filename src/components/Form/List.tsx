@@ -1,120 +1,52 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect } from "react";
 import Input from "./Input";
-import { deleteRepo } from "../../api/repo";
 import { GoPersonFill, GoDotFill, GoSync } from "react-icons/go";
 import Loading from "../loading";
 import { useUser } from "../../utils/UserProvider";
 import Modal from "../Modal";
 import { GoAlert } from "react-icons/go";
 import useThrottle from "../../hooks/useThrottle";
+import useListData from "../../hooks/useListData";
 
-interface IErrorDetails {
-  repo: string;
-  error: string;
-}
-
-const deleteSelectedRepos = async (
-  items: IRepoItem[],
-  auth: string,
-  user: string
-): Promise<{ success: string[]; errors: IErrorDetails[] }> => {
-  const success: string[] = [];
-  const errors: IErrorDetails[] = [];
-
-  const promises = items.map(({ value }) => deleteRepo(auth, user, value));
-  const settledPromises = await Promise.allSettled(promises);
-
-  settledPromises.forEach((result, i) => {
-    if (result.status === "fulfilled") {
-      success.push(items[i].value);
-    } else if (result.status === "rejected" && result.reason instanceof Error) {
-      errors.push({ repo: items[i].value, error: result.reason.message });
-    }
-  });
-
-  return { success, errors };
-};
-
-const RepoForm = () => {
+const List = () => {
+  const { user, token: auth, isLoggingin } = useUser();
   const {
-    user,
-    token: auth,
-    isLoggingin,
+    data,
     isLoading,
-    availableRepos,
-    setAvailableRepos,
-    refreshRepositories,
-  } = useUser();
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [selectedItems, setSelectedItems] = useState<IRepoItem[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isValid, setIsValid] = useState(false);
-
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
+    selectedItems,
+    setSelectedItems,
+    isModalOpen,
+    isDeleting,
+    fetchData,
+    toggleSelect,
+    openModal,
+    isValid,
+    handleValidation,
+    closeModal,
+    deleteSelectedData,
+  } = useListData(auth, user);
 
   const handleOnChange = (item: IRepoItem) => {
-    setSelectedItems((prev) =>
-      prev.find(({ value }) => value === item.value)
-        ? // unchecked
-          prev.filter(({ value }) => value !== item.value)
-        : // checked
-          [...prev, item]
-    );
+    toggleSelect(item);
   };
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
       // Select all repositories
-      setSelectedItems(availableRepos.map(({ value }, id) => ({ id, value })));
+      setSelectedItems(data);
     } else {
       // Deselect all repositories
       setSelectedItems([]);
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleDelete = async (e) => {
     e.preventDefault();
-    setIsDeleting(true);
-    closeModal();
-    // delete selected repos
-    const { success, errors } = await deleteSelectedRepos(
-      selectedItems,
-      auth,
-      user
-    );
-    // display success/error messages
-    if (success.length) {
-      alert(`Successfully deleted:\n${success.join("\n")}`);
-    }
-    if (errors.length) {
-      alert(
-        `Failed to delete:\n${errors
-          .map((err) => `${err.repo}: ${err.error}`)
-          .join("\n")}`
-      );
-    }
-    // Remove deleted repos from available repos
-    setAvailableRepos((prev: IRepoItem[]) =>
-      prev.filter(({ value }) => !success.includes(value))
-    );
-    // Reset all selected items
-    setSelectedItems([]);
-    setIsDeleting(false);
+    deleteSelectedData();
   };
 
-  const handleValidation = ({ target }) => {
-    // validate input matches "{owner}" using regex
-    const regex = new RegExp(user, "i");
-    console.log(target.value, !regex.test(target.value));
-    if (!regex.test(target.value)) {
-      return setIsValid(false);
-    }
-    return setIsValid(true);
-  };
   const throttleRefresh = useThrottle(async () => {
-    refreshRepositories(auth);
-    console.log("Refreshing repositories...");
+    fetchData();
   }, 3000);
 
   useEffect(() => {
@@ -128,13 +60,13 @@ const RepoForm = () => {
   }
   return (
     <Loading isLoading={isLoading || isLoggingin}>
-      <form className="container w-full p-3 px-2 mx-auto" id="repos">
+      <div className="container w-full p-3 px-2 mx-auto" id="repos">
         <h1 className="text-base font-semibold "> Active Repositories</h1>
 
         {/* <p className="mb-2 text-xs text-black/50">
           Select available repositories to delete forever
         </p> */}
-        <div className="flex items-center justify-between mt-2">
+        <div className="flex items-center justify-between pr-2 mt-2">
           <div className="flex items-center gap-4 ">
             <input
               id="selectall"
@@ -143,8 +75,8 @@ const RepoForm = () => {
             ></input>
             <p className="flex items-center gap-1 pr-4 text-xs text-black/50">
               <GoPersonFill className="text-black" />
-              {user} <GoDotFill className="text-black" />{" "}
-              {availableRepos.length} repositories
+              {user} <GoDotFill className="text-black" /> {data.length}{" "}
+              repositories
             </p>
           </div>
           <button
@@ -157,7 +89,7 @@ const RepoForm = () => {
         </div>
 
         <div className="max-h-screen pr-4 overflow-auto ">
-          {availableRepos.map((repo, i) => (
+          {data.map((repo, i) => (
             <Input
               key={i}
               checked={selectedItems.some(({ value }) => value === repo.value)}
@@ -202,7 +134,7 @@ const RepoForm = () => {
               This action cannot be undone
             </p> */}
             <input
-              onChange={handleValidation}
+              onChange={(e) => handleValidation(e.target.value)}
               className="w-full p-3 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               type="text"
               placeholder={user}
@@ -217,7 +149,7 @@ const RepoForm = () => {
           <div className="flex justify-end gap-4 mt-6">
             <button
               disabled={!isValid}
-              onClick={handleSubmit}
+              onClick={handleDelete}
               className={`px-6 py-3 text-xs font-semibold rounded-md transition duration-200 ${
                 !isValid
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -228,9 +160,9 @@ const RepoForm = () => {
             </button>
           </div>
         </Modal>
-      </form>
+      </div>
     </Loading>
   );
 };
 
-export default RepoForm;
+export default List;

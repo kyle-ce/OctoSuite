@@ -1,5 +1,5 @@
 import React from "react";
-import RepoForm from "./components/Form/RepoForm";
+import RepoList from "./components/Form/List";
 import Login from "./components/Login";
 import { Routes, Route } from "react-router";
 import UserProvider from "./utils/UserProvider";
@@ -9,7 +9,7 @@ function App() {
     <UserProvider>
       <Routes>
         <Route path="/" element={<Login />}>
-          <Route index element={<RepoForm />} />
+          <Route index element={<RepoList />} />
         </Route>
       </Routes>
     </UserProvider>

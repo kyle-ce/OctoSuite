@@ -1,21 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import { GoPasskeyFill } from "react-icons/go";
 import { Outlet } from "react-router";
 import { useUser } from "../utils/UserProvider";
 import { getUser } from "../api/user";
-import useThrottle from "../hooks/useThrottle";
 
 const login = () => {
-  const {
-    setUser,
-    token,
-    setToken,
-    setIsLoggingin,
-    user,
-    refreshRepositories,
-  } = useUser();
-  const pullDownRef = useRef<HTMLDivElement>(null);
-  const [startY, setStartY] = useState(0);
+  const { setUser, token, setToken, setIsLoggingin } = useUser();
 
   const handleChange = ({ target }) => {
     setToken(target.value);
@@ -38,10 +28,7 @@ const login = () => {
 
   return (
     // https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic
-    <div
-      ref={pullDownRef}
-      className="container mx-auto border border-solid border-red"
-    >
+    <div className="container mx-auto border border-solid border-red">
       {/* Add landing page */}
       <form
         className="flex flex-col justify-start p-3 "
