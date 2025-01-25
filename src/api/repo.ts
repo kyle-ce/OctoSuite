@@ -1,6 +1,5 @@
 import { Octokit } from "octokit";
-import { delay } from "../utils";
-import { OctokitResponse } from "@octokit/types";
+
 // Octokit.js
 // https://github.com/octokit/core.js#readme
 

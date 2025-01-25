@@ -1,10 +1,10 @@
 import React from "react";
 import { GoPasskeyFill } from "react-icons/go";
 import { Outlet } from "react-router";
-import { useUser } from "../utils/UserProvider";
+import { useUser } from "../UserProvider";
 import { getUser } from "../api/user";
 
-const login = () => {
+const Login = () => {
   const { setUser, token, setToken, setIsLoggingin } = useUser();
 
   const handleChange = ({ target }) => {
@@ -61,4 +61,4 @@ const login = () => {
   );
 };
 
-export default login;
+export default Login;
