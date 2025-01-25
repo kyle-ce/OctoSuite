@@ -1,6 +1,6 @@
 import React from "react";
 import { GoPersonFill, GoDotFill, GoSync } from "react-icons/go";
-import { useUser } from "../../UserProvider";
+import { useUser } from "../../../UserProvider";
 
 const ListHeader = ({ items, refresh, toggleSelectAll, clearSelection }) => {
   const { user } = useUser();
