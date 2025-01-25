@@ -6,7 +6,6 @@ import { getUser } from "../api/user";
 
 const Login = () => {
   const { setUser, token, setToken, setIsLoggingin } = useUser();
-
   const handleChange = ({ target }) => {
     setToken(target.value);
   };
