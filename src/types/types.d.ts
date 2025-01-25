@@ -1,9 +1,20 @@
+interface IErrorDetails {
+  repo: string;
+  error: string;
+}
+
+interface IRepoItem {
+  id: number;
+  value: string;
+}
+
 interface IUserPlan {
   collaborators: number;
   name: string;
   space: number;
   private_repos: number;
 }
+
 interface IRepoItem {
   id: number;
   value: string;

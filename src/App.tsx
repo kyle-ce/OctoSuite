@@ -1,15 +1,15 @@
 import React from "react";
-import RepoList from "./components/List/ListData";
-import Login from "./components/Login";
+import List from "./components/List";
+import Login from "./routes/Login";
 import { Routes, Route } from "react-router";
-import UserProvider from "./utils/UserProvider";
+import UserProvider from "./UserProvider";
 
 function App() {
   return (
     <UserProvider>
       <Routes>
         <Route path="/" element={<Login />}>
-          <Route index element={<RepoList />} />
+          <Route index element={<List />} />
         </Route>
       </Routes>
     </UserProvider>

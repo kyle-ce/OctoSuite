@@ -1,14 +1,6 @@
-import { useState, useCallback } from "react";
-import { getAllRepositoriesNames, deleteRepo } from "../api/repo";
-
-interface IErrorDetails {
-  repo: string;
-  error: string;
-}
-export interface IRepoItem {
-  id: number;
-  value: string;
-}
+import { useCallback, useState } from "react";
+import { deleteRepo, getAllRepositoriesNames } from "../api/repo";
+import useThrottle from "./useThrottle";
 
 export const deleteSelectedRepos = async (
   items: IRepoItem[],
@@ -32,18 +24,18 @@ export const deleteSelectedRepos = async (
   return { success, errors };
 };
 
-const useManageRepo = (auth: string, user: string) => {
+export const useList = <T extends IRepoItem>(auth, user) => {
+  const [selectedItems, setSelectedItems] = useState<T[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [data, setData] = useState<IRepoItem[]>([]);
-
+  const [data, setData] = useState<T[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useThrottle(async () => {
     setIsLoading(true);
     try {
       const names = await getAllRepositoriesNames(auth);
       if (names) {
-        setData(names.map((repo, i) => ({ value: repo, id: i })));
+        setData(names.map((name, i) => ({ value: name, id: i } as T)));
       }
     } catch (error) {
       console.error("Failed to fetch data:", error);
@@ -51,7 +43,7 @@ const useManageRepo = (auth: string, user: string) => {
     } finally {
       setIsLoading(false);
     }
-  }, [auth]);
+  }, 3000);
 
   const deleteSelectedData = useCallback(
     async (selectedItems) => {
@@ -73,22 +65,37 @@ const useManageRepo = (auth: string, user: string) => {
         );
       }
       // Remove deleted repos from available repos
-      setData((prev: IRepoItem[]) =>
-        prev.filter(({ value }) => !success.includes(value))
-      );
+      setData((prev) => prev.filter(({ value }) => !success.includes(value)));
       // Reset all selected items
       setIsDeleting(false);
     },
     [auth, user]
   );
 
+  const toggleSelect = (item: T) => {
+    setSelectedItems((prevSelected) =>
+      prevSelected?.some((selected) => selected.id === item.id)
+        ? prevSelected.filter((selected) => selected.id !== item.id)
+        : [...prevSelected, item]
+    );
+  };
+
+  const toggleSelectAll = (items: T[]) => {
+    setSelectedItems(items);
+  };
+
+  const clearSelection = () => setSelectedItems([]);
+
   return {
     data,
-    isLoading,
-    isDeleting,
+    selectedItems,
     fetchData,
     deleteSelectedData,
+    toggleSelect,
+    toggleSelectAll,
+    clearSelection,
+    isDeleting,
+    isLoading,
   };
 };
-
-export default useManageRepo;
+export default useList;
