@@ -16,7 +16,6 @@ export const deleteSelectedRepos = async (
   const settledPromises = await Promise.allSettled(promises);
 
   settledPromises.forEach((result, i) => {
-    console.log("confusing results logic", result, items);
     if (result.status === "fulfilled") {
       success.push(items[i].value);
     } else if (result.status === "rejected") {
@@ -53,7 +52,6 @@ export const useList = <T extends IRepoItem>(auth, user) => {
   const deleteSelectedData = useCallback(
     async (selectedItems) => {
       setIsDeleting(true);
-      console.log("selected items", selectedItems);
       const { success, errors } = await deleteSelectedRepos(
         selectedItems,
         auth,
@@ -85,7 +83,6 @@ export const useList = <T extends IRepoItem>(auth, user) => {
   );
 
   const toggleSelect = (item: T) => {
-    console.log("SelectedItems", selectedItems, item);
     setSelectedItems((prevSelected) =>
       prevSelected?.some((selected) => selected.id === item.id)
         ? prevSelected.filter((selected) => selected.id !== item.id)
