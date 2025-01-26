@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { IToast } from "./ToastProvider";
+import { IToast } from "../../../contexts/ToastProvider";
 
 const Toast = ({ title, description, variant = "info", onClose }: IToast) => {
   const [show, setShow] = useState(false);

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ListHeader from "./ListHeader";
-import Loading from "../../loading";
-import { useUser } from "../../../UserProvider";
+import Loading from "./Loading";
+import { useUser } from "../../../contexts/UserProvider";
 import ListData from "./ListData";
 import ListAction from "./ListAction";
 import useList from "../../../hooks/useList";
@@ -19,7 +19,7 @@ const List = () => {
     isDeleting,
     deleteSelectedData,
     isLoading,
-  } = useList(auth, user);
+  } = useList<IRepoItem>(auth, user);
 
   useEffect(() => {
     if (user) {

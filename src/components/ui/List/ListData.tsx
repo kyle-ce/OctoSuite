@@ -15,14 +15,14 @@ const List = ({ items, selectedItems, isDeleting, toggleSelect }) => {
             key={i}
             checked={selectedItems?.some((item) => item.value === repo.value)}
             isLoading={
-              selectedItems?.find(({ value }) => value === repo.value) &&
-              isDeleting
+              selectedItems?.find(({ id }) => id === repo.id) && isDeleting
             }
-            id={i}
+            id={repo.id}
             value={repo.value}
-            onChange={({ target }) =>
-              handleToggleSelect({ id: i, value: target.value })
-            }
+            onChange={({ target }) => {
+              console.log("Selected item target", target);
+              return handleToggleSelect({ id: target.id, value: target.value });
+            }}
           />
         ))}
       </div>

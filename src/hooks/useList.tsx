@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { deleteRepo, getAllRepositoriesNames } from "../api/repo";
 import useThrottle from "./useThrottle";
+import { useToast } from "../contexts/ToastProvider";
 
 export const deleteSelectedRepos = async (
   items: IRepoItem[],
@@ -10,10 +11,12 @@ export const deleteSelectedRepos = async (
   const success: string[] = [];
   const errors: IErrorDetails[] = [];
 
+  // use value for API
   const promises = items.map(({ value }) => deleteRepo(auth, user, value));
   const settledPromises = await Promise.allSettled(promises);
 
   settledPromises.forEach((result, i) => {
+    console.log("confusing results logic", result, items);
     if (result.status === "fulfilled") {
       success.push(items[i].value);
     } else if (result.status === "rejected") {
@@ -30,12 +33,14 @@ export const useList = <T extends IRepoItem>(auth, user) => {
   const [data, setData] = useState<T[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const { addToast } = useToast();
+
   const fetchData = useThrottle(async () => {
     setIsLoading(true);
     try {
       const names = await getAllRepositoriesNames(auth);
       if (names) {
-        setData(names.map((name, i) => ({ value: name, id: i } as T)));
+        setData(names.map((name) => ({ value: name, id: name } as T)));
       }
     } catch (error) {
       console.error("Failed to fetch data:", error);
@@ -48,6 +53,7 @@ export const useList = <T extends IRepoItem>(auth, user) => {
   const deleteSelectedData = useCallback(
     async (selectedItems) => {
       setIsDeleting(true);
+      console.log("selected items", selectedItems);
       const { success, errors } = await deleteSelectedRepos(
         selectedItems,
         auth,
@@ -55,14 +61,20 @@ export const useList = <T extends IRepoItem>(auth, user) => {
       );
       // display success/error messages
       if (success.length) {
-        alert(`Successfully deleted:\n${success.join("\n")}`);
+        const toast = {
+          title: `Successfully Deleted ${selectedItems.length} Repositories`,
+          description: `\n${success.join("\n")}`,
+        };
+        addToast(toast);
       }
       if (errors.length) {
-        alert(
-          `Failed to delete:\n${errors
+        const toast = {
+          title: `Successfully Deleted ${selectedItems.length} Repositories`,
+          description: `\n${errors
             .map((err) => `${err.repo}: ${err.error}`)
-            .join("\n")}`
-        );
+            .join("\n")}`,
+        };
+        addToast(toast);
       }
       // Remove deleted repos from available repos
       setData((prev) => prev.filter(({ value }) => !success.includes(value)));
@@ -73,6 +85,7 @@ export const useList = <T extends IRepoItem>(auth, user) => {
   );
 
   const toggleSelect = (item: T) => {
+    console.log("SelectedItems", selectedItems, item);
     setSelectedItems((prevSelected) =>
       prevSelected?.some((selected) => selected.id === item.id)
         ? prevSelected.filter((selected) => selected.id !== item.id)

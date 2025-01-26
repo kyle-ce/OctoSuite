@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import Toast from ".";
+import Toast from "../components/ui/Toast";
 
 export interface IToast {
   id?: number;

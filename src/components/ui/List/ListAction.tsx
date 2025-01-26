@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { GoAlert } from "react-icons/go";
 import Modal from "../Modal";
-import { useUser } from "../../../UserProvider";
+import { useUser } from "../../../contexts/UserProvider";
 
 const ListAction = ({ items, clearSelection, deleteSelectedData }) => {
   const { user } = useUser();
