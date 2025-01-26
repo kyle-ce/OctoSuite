@@ -6,7 +6,7 @@ const Toast = ({ title, description, variant = "info", onClose }: IToast) => {
   const [translateX, setTranslateX] = useState("500");
 
   const timerRefRemove = useRef<NodeJS.Timeout | null>(null);
-  const timerRefShow = useRef<NodeJS.Timeout | null>(null);
+  const timerRefAllowRender = useRef<NodeJS.Timeout | null>(null);
   const toastRef = useRef<HTMLDivElement | null>(null);
   const CloseIcon = () => (
     <svg
@@ -28,8 +28,8 @@ const Toast = ({ title, description, variant = "info", onClose }: IToast) => {
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
-      fill="currentColor"
-      className="size-8 "
+      fill=""
+      className="text-white fill-blue-400 size-8"
     >
       <path
         fillRule="evenodd"
@@ -39,12 +39,21 @@ const Toast = ({ title, description, variant = "info", onClose }: IToast) => {
     </svg>
   );
 
+  const handleClick = (e) => {
+    if (timerRefRemove.current) {
+      clearTimeout(timerRefRemove.current);
+      console.log(e.target);
+    }
+  };
+
   useEffect(() => {
-    timerRefShow.current = setTimeout(() => {
+    timerRefAllowRender.current = setTimeout(() => {
       setShow(true);
       timerRefRemove.current = setTimeout(() => {
         setShow(false);
+        // wait 3s before translating off screen
       }, 3000);
+      // allow layout to render off screen by delaying set true by 10ms
     }, 10);
     if (toastRef.current) {
       const boundingRect = toastRef.current.getBoundingClientRect();
@@ -53,8 +62,8 @@ const Toast = ({ title, description, variant = "info", onClose }: IToast) => {
       );
     }
     return () => {
-      if (timerRefShow.current) {
-        clearTimeout(timerRefShow.current);
+      if (timerRefAllowRender.current) {
+        clearTimeout(timerRefAllowRender.current);
       }
       if (timerRefRemove.current) {
         clearTimeout(timerRefRemove.current);
@@ -66,6 +75,7 @@ const Toast = ({ title, description, variant = "info", onClose }: IToast) => {
     <>
       <div
         ref={toastRef}
+        onClick={handleClick}
         style={{
           transform: show ? "translateX(0)" : `translateX(${translateX}px)`,
         }}
@@ -75,7 +85,7 @@ const Toast = ({ title, description, variant = "info", onClose }: IToast) => {
       >
         <div
           id="timer"
-          className={`absolute bottom-0 left-0 border-b-[4px] border-white transition-all ease-linear duration-[3s] ${
+          className={`absolute bottom-0 left-0 border-b-[4px] border-blue-400 transition-all ease-linear duration-[3s] ${
             show ? "w-0" : "w-full"
           }`}
         />
