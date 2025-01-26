@@ -1,15 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
-interface IToast {
-  title: string;
-  description: string;
-  variant?: "alert" | "error" | "info";
-}
+import { IToast } from "./ToastProvider";
 
-const Toast = ({ title, description, variant = "info" }: IToast) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const [translateX, setTranslateX] = useState("");
+const Toast = ({ title, description, variant = "info", onClose }: IToast) => {
+  const [show, setShow] = useState(false);
+  const [translateX, setTranslateX] = useState("500");
 
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRefRemove = useRef<NodeJS.Timeout | null>(null);
+  const timerRefShow = useRef<NodeJS.Timeout | null>(null);
   const toastRef = useRef<HTMLDivElement | null>(null);
   const CloseIcon = () => (
     <svg
@@ -42,17 +39,13 @@ const Toast = ({ title, description, variant = "info" }: IToast) => {
     </svg>
   );
 
-  const handleClick = () => {
-    if (toastRef.current) {
-      setIsVisible(true);
-      const timer = setTimeout(() => {
-        setIsVisible(false);
-      }, 3000);
-      timerRef.current = timer;
-    }
-  };
-
   useEffect(() => {
+    timerRefShow.current = setTimeout(() => {
+      setShow(true);
+      timerRefRemove.current = setTimeout(() => {
+        setShow(false);
+      }, 3000);
+    }, 10);
     if (toastRef.current) {
       const boundingRect = toastRef.current.getBoundingClientRect();
       setTranslateX(
@@ -60,62 +53,43 @@ const Toast = ({ title, description, variant = "info" }: IToast) => {
       );
     }
     return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
+      if (timerRefShow.current) {
+        clearTimeout(timerRefShow.current);
+      }
+      if (timerRefRemove.current) {
+        clearTimeout(timerRefRemove.current);
       }
     };
   }, []);
 
   return (
     <>
-      <button
-        onClick={handleClick}
-        className="px-4 py-2 m-8 text-xl font-bold text-center duration-300 border border-solid rounded-md shadow-lg hover:scale-110"
+      <div
+        ref={toastRef}
+        style={{
+          transform: show ? "translateX(0)" : `translateX(${translateX}px)`,
+        }}
+        id="toast-notification"
+        className={`group mb-4 mr-4 flex items-center justify-center max-w-[500px] gap-2 border-white  pl-2 px-4 py-2  text-white duration-300 bg-black/50 border border-solid rounded-md shadow-lg cursor-pointer
+        `}
       >
-        Alert!
-      </button>
-      <div className="fixed bottom-0 right-0 flex flex-col border-4 border-red-500 border-solid">
         <div
-          ref={toastRef}
-          style={{
-            transform: isVisible
-              ? "translateX(0)"
-              : `translateX(${translateX}px)`,
-          }}
-          id="toast-notification"
-          className={`group transform mb-4 mr-4 flex items-center justify-center max-w-[500px] gap-2 border-white  pl-2 px-4 py-2  text-white duration-500 bg-black/50 border border-solid rounded-md shadow-lg cursor-pointer
-        ${isVisible ? "after:w-0" : " after:w-full"} 
-        `}
+          id="timer"
+          className={`absolute bottom-0 left-0 border-b-[4px] border-white transition-all ease-linear duration-[3s] ${
+            show ? "w-0" : "w-full"
+          }`}
+        />
+        <button
+          onClick={onClose}
+          type="button"
+          className="absolute opacity-0 duration-300 group-hover:opacity-100 ease-out top-0 right-0 w-[15px] h-[15px] m-[-5px] gray-500 border text-[8px] leading-tight bg-gray-500 rounded-full text-black/50 hover:scale-110"
         >
-          <button className="absolute opacity-0 duration-300 group-hover:opacity-100 ease-out top-0 right-0 w-[15px] h-[15px] m-[-5px] gray-500 border text-[8px] leading-tight bg-gray-500 rounded-full text-black/50 hover:scale-110">
-            <CloseIcon />
-          </button>
-          <AlertIcon />
-          <div className="flex flex-col items-start justify-start">
-            <h1 className="p-0 text-base leading-tight">{title}</h1>
-            <p className="text-xs text-gray-100 text-wrap">{description}</p>
-          </div>
-        </div>
-        <div
-          ref={toastRef}
-          style={{
-            transform: isVisible
-              ? "translateX(0)"
-              : `translateX(${translateX}px)`,
-          }}
-          id="toast-notification"
-          className={`group transform mb-4 mr-4 flex items-center justify-center max-w-[500px] gap-2 border-white  pl-2 px-4 py-2  text-white duration-500 bg-black/50 border border-solid rounded-md shadow-lg cursor-pointer
-        ${isVisible ? "after:w-0" : " after:w-full"} 
-        `}
-        >
-          <button className="absolute opacity-0 duration-300 group-hover:opacity-100 ease-out top-0 right-0 w-[15px] h-[15px] m-[-5px] gray-500 border text-[8px] leading-tight bg-gray-500 rounded-full text-black/50 hover:scale-110">
-            <CloseIcon />
-          </button>
-          <AlertIcon />
-          <div className="flex flex-col items-start justify-start">
-            <h1 className="p-0 text-base leading-tight">{title}</h1>
-            <p className="text-xs text-gray-100 text-wrap">{description}</p>
-          </div>
+          <CloseIcon />
+        </button>
+        <AlertIcon />
+        <div className="flex flex-col items-start justify-start">
+          <h1 className="p-0 text-base leading-tight">{title}</h1>
+          <p className="text-xs text-gray-100 text-wrap">{description}</p>
         </div>
       </div>
     </>

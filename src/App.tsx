@@ -14,15 +14,6 @@ function App() {
           <Route path="/" element={<Login />}>
             <Route index element={<List />} />
           </Route>
-          <Route
-            path="/toast"
-            element={
-              <Toast
-                title={"Title"}
-                description={"Toast description of alert message"}
-              />
-            }
-          />
         </Routes>
       </ToastProvider>
     </UserProvider>

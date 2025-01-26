@@ -3,9 +3,11 @@ import { GoPasskeyFill } from "react-icons/go";
 import { Outlet } from "react-router";
 import { useUser } from "../UserProvider";
 import { getUser } from "../api/user";
+import { useToast } from "../components/ui/Toast/ToastProvider";
 
 const Login = () => {
   const { setUser, token, setToken, setIsLoggingin } = useUser();
+  const { addToast } = useToast();
   const handleChange = ({ target }) => {
     setToken(target.value);
   };
@@ -16,6 +18,11 @@ const Login = () => {
       const { data } = await getUser(token);
       setUser(data?.login || "");
       setToken(data?.login ? token : "");
+      const toast = {
+        title: "Successful",
+        description: `Successfully retrieved user details: ${data?.login}`,
+      };
+      addToast(toast);
       console.info("Successfully retrieved user details:", data?.login);
     } catch {
       setUser("");
