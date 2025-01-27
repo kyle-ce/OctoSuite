@@ -14,7 +14,7 @@ export interface IToast {
 const Toast = ({ title, description, variant = "info", onClose }: IToast) => {
   const [show, setShow] = useState(false);
   //large number to prevent it from peeking on realistic large screens
-  const [translateX, setTranslateX] = useState("9999");
+  const [translateX, setTranslateX] = useState("500");
 
   const timerRefRemove = useRef<NodeJS.Timeout | null>(null);
   const timerRefAllowRender = useRef<NodeJS.Timeout | null>(null);
@@ -164,7 +164,7 @@ const Toast = ({ title, description, variant = "info", onClose }: IToast) => {
         <button
           onClick={onClose}
           type="button"
-          className="absolute opacity-0 duration-300 group-hover:opacity-100 ease-out top-0 right-0 w-[15px] h-[15px] m-[-5px] gray-500 border text-[8px] leading-tight bg-gray-500 rounded-full text-black/50 hover:scale-110"
+          className="absolute opacity-0 group-hover:opacity-100 ease-out top-0 right-0 size-[15px] m-[-5px] gray-500 border text-[8px] leading-tight bg-gray-500 rounded-full text-black/50 hover:scale-110"
         >
           <CloseIcon />
         </button>
