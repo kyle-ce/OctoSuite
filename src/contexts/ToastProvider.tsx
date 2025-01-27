@@ -1,26 +1,16 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import Toast from "../components/ui/Toast";
 
-export interface IToast {
-  id?: number;
-  title: string;
-  description: string;
-  variant?: "alert" | "error" | "info";
-  show?: boolean;
-  duration?: number;
-  onClose?: () => void;
-}
-
 interface IToastContext {
-  addToast: (prev: IToast) => void;
+  addToast: (prev) => void;
 }
 
 const ToastContext = createContext<IToastContext | undefined>(undefined);
 
 const ToastProvider = ({ children }) => {
-  const [toasts, setToasts] = useState<IToast[] | []>([]);
+  const [toasts, setToasts] = useState<any[]>([]);
 
-  const addToast = (toast: IToast) => {
+  const addToast = (toast) => {
     // lazy id
     const id = Date.now();
     setToasts((prev) => [...prev, { ...toast, id }]);
@@ -35,7 +25,7 @@ const ToastProvider = ({ children }) => {
     }, toast.duration || 3000);
   };
 
-  const removeToast = ({ id }: IToast) => {
+  const removeToast = ({ id }: any) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   };
 
@@ -43,12 +33,13 @@ const ToastProvider = ({ children }) => {
     <ToastContext.Provider value={{ addToast }}>
       {children}
       <div className="fixed bottom-0 right-0 flex flex-col ">
-        {toasts.map((toast: IToast) => (
+        {toasts.map((toast) => (
           <Toast
             key={toast.id}
+            variant={toast.variant}
             id={toast.id}
             show={toast.show}
-            onClose={() => removeToast(toast)}
+            onClose={() => removeToast(toast.id)}
             title={toast.title}
             description={toast.description}
           />

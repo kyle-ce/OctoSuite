@@ -32,6 +32,7 @@ export const useList = <T extends repository>(
     const toast = {
       title: `Successfully Deleted ${success.length} Repositories`,
       description: `\n${success.join("\n")}`,
+      variant: "success",
     };
     addToast(toast);
   };
@@ -41,6 +42,7 @@ export const useList = <T extends repository>(
       description: `\n${errors
         .map((err) => `${err.repo}: ${err.error}`)
         .join("\n")}`,
+      variant: "alert",
     };
     addToast(toast);
   };

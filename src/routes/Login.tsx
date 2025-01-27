@@ -13,6 +13,7 @@ const Login = () => {
     addToast({
       title: "Successful",
       description: `Successfully retrieved user details: ${user}`,
+      variant: "success",
     });
     console.info("Successfully retrieved user details:", user);
   };
@@ -20,6 +21,7 @@ const Login = () => {
     addToast({
       title: "Failed to login",
       description: `Failed to retreived user details`,
+      variant: "error",
     });
     console.info("Failed to retreived user details:", data);
   };
