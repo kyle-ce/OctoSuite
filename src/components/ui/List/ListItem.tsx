@@ -1,6 +1,7 @@
 import React from "react";
 import { RotatingLines } from "react-loader-spinner";
 
+// TODO: fix typiong for props
 const ListItem = ({ value, id, onChange, isLoading, checked }) => {
   return (
     <div className="mt-1 ">

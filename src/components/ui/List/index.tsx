@@ -1,13 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import ListHeader from "./ListHeader";
 import Loading from "./Loading";
 import { useUser } from "../../../contexts/UserProvider";
 import ListData from "./ListData";
 import ListAction from "./ListAction";
 import useList from "../../../hooks/useList";
+import {
+  deleteRepositories,
+  fetchRepositoriesData,
+} from "../../../services/repositoryService";
 
 const List = () => {
-  // get user details
+  // Create closures for fetchData and deleteData
+  const fetchDataHandler = () => fetchRepositoriesData(auth);
+  const deleteDataHandler = (selectedItems) =>
+    deleteRepositories(selectedItems, auth, user);
+
   const { user, token: auth, isLoggingin } = useUser();
   const {
     data,
@@ -19,7 +27,7 @@ const List = () => {
     isDeleting,
     deleteSelectedData,
     isLoading,
-  } = useList<IRepoItem>(auth, user);
+  } = useList(fetchDataHandler, deleteDataHandler);
 
   useEffect(() => {
     if (user) {

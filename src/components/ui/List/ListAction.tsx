@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { GoAlert } from "react-icons/go";
 import Modal from "../Modal";
 import { useUser } from "../../../contexts/UserProvider";
 
+// TODO: fix typing for props add style for element failed to delete
 const ListAction = ({ items, clearSelection, deleteSelectedData }) => {
   const { user } = useUser();
   const [isModalOpen, setIsModalOpen] = useState(false);
