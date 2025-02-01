@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
+import { useToast } from "../../../contexts/ToastProvider";
+import { TOAST } from "../../../libs/constants";
 
 export interface IToast {
   id?: string;
@@ -7,18 +9,29 @@ export interface IToast {
   description: string;
   variant?: "alert" | "error" | "info" | "success";
   show?: boolean;
-  duration?: number;
+  displayTime?: number;
   onClose?: () => void;
 }
 
-const Toast = ({ title, description, variant = "info", onClose }: IToast) => {
+const Toast = ({
+  id,
+  title,
+  description,
+  variant = "info",
+  displayTime = TOAST.SHOW_TIME,
+  onClose,
+}: IToast) => {
   const [show, setShow] = useState(false);
+
   //large number to prevent it from peeking on realistic large screens
   const [translateX, setTranslateX] = useState("500");
 
   const timerRefRemove = useRef<NodeJS.Timeout | null>(null);
+  const timerRefShow = useRef<NodeJS.Timeout | null>(null);
   const timerRefAllowRender = useRef<NodeJS.Timeout | null>(null);
   const toastRef = useRef<HTMLDivElement | null>(null);
+
+  const { removeToast } = useToast();
 
   const CloseIcon = () => (
     <svg
@@ -100,21 +113,28 @@ const Toast = ({ title, description, variant = "info", onClose }: IToast) => {
   );
 
   const handleClick = (e) => {
-    if (timerRefRemove.current) {
-      clearTimeout(timerRefRemove.current);
+    if (timerRefShow.current) {
+      clearTimeout(timerRefShow.current);
       console.log(e.target);
     }
   };
 
   useEffect(() => {
+    // Start the toast rendering process with a slight delay to allow the mount
+    // After the delay, show the toast, then wait for the specified display time
+    // Once the display time is over, start the toast's exit animation and finally remove it
+
+    console.log("toast id:", id);
     timerRefAllowRender.current = setTimeout(() => {
       setShow(true);
-      timerRefRemove.current = setTimeout(() => {
+      timerRefShow.current = setTimeout(() => {
         setShow(false);
-        // wait 3s before translating off screen
-      }, 3000);
-      // allow layout to render off screen by delaying set true by 10ms
-    }, 10);
+        timerRefRemove.current = setTimeout(
+          () => removeToast(id),
+          TOAST.ANIMATE_TIME
+        );
+      }, displayTime);
+    }, TOAST.MOUNT_DELAY);
     if (toastRef.current) {
       const boundingRect = toastRef.current.getBoundingClientRect();
       setTranslateX(
@@ -124,6 +144,9 @@ const Toast = ({ title, description, variant = "info", onClose }: IToast) => {
     return () => {
       if (timerRefAllowRender.current) {
         clearTimeout(timerRefAllowRender.current);
+      }
+      if (timerRefShow.current) {
+        clearTimeout(timerRefShow.current);
       }
       if (timerRefRemove.current) {
         clearTimeout(timerRefRemove.current);
@@ -138,10 +161,11 @@ const Toast = ({ title, description, variant = "info", onClose }: IToast) => {
         onClick={handleClick}
         style={{
           transform: show ? "translateX(0)" : `translateX(${translateX}px)`,
+          transitionDuration: `${TOAST.ANIMATE_TIME}ms`,
         }}
         id="toast-notification"
         className={clsx(
-          "group mb-4 mr-4 border flex items-center justify-center max-w-[500px] gap-2  pl-2 px-4 py-2  text-white duration-300 bg-black/50 border-solid rounded-md shadow-lg cursor-pointer",
+          `group mb-4 mr-4 border flex items-center justify-center max-w-[500px] gap-2  pl-2 px-4 py-2  text-white bg-black/50 border-solid rounded-md shadow-lg cursor-pointer`,
           {
             // varient classes here
           }
@@ -149,8 +173,9 @@ const Toast = ({ title, description, variant = "info", onClose }: IToast) => {
       >
         <div
           id="timer"
+          style={{ transitionDuration: `${displayTime}ms` }}
           className={clsx(
-            "absolute bottom-0 left-0 border-b-[4px] transition-all ease-linear duration-[3s]",
+            `absolute bottom-0 left-0 border-b-[4px] transition-all ease-linear`,
             {
               "w-0": show,
               "w-full": !show,

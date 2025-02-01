@@ -3,6 +3,7 @@ import Toast from "../components/ui/Toast";
 
 interface IToastContext {
   addToast: (prev) => void;
+  removeToast: (id) => void;
 }
 
 const ToastContext = createContext<IToastContext | undefined>(undefined);
@@ -14,23 +15,14 @@ const ToastProvider = ({ children }) => {
     // lazy id
     const id = Date.now();
     setToasts((prev) => [...prev, { ...toast, id }]);
-    // first allow toast to display for 3s before dissmissing
-    setTimeout(() => {
-      // second remove toast from data after its transition from screen
-      setTimeout(() => {
-        setToasts((prev) => prev.filter((e) => e.id !== id));
-        // 300 (3ms) matches tailwind duration
-      }, 300);
-      // 3000 (3s) matches css timing function
-    }, toast.duration || 3000);
   };
 
-  const removeToast = ({ id }: any) => {
+  const removeToast = (id: any) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   };
 
   return (
-    <ToastContext.Provider value={{ addToast }}>
+    <ToastContext.Provider value={{ addToast, removeToast }}>
       {children}
       <div className="fixed bottom-0 right-0 flex flex-col ">
         {toasts.map((toast) => (

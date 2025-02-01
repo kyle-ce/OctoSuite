@@ -11,7 +11,6 @@ import {
 } from "../../../services/repositoryService";
 
 const List = () => {
-  // Create closures for fetchData and deleteData
   const fetchDataHandler = () => fetchRepositoriesData(auth);
   const deleteDataHandler = (selectedItems) =>
     deleteRepositories(selectedItems, auth, user);
@@ -50,12 +49,12 @@ const List = () => {
           items={data}
           selectedItems={selectedItems}
           toggleSelect={toggleSelect}
-          isDeleting={isDeleting}
+          isLoading={isDeleting}
         />
         <ListAction
           items={selectedItems}
           clearSelection={clearSelection}
-          deleteSelectedData={deleteSelectedData}
+          onSubmit={deleteSelectedData}
         />
       </div>
     </Loading>

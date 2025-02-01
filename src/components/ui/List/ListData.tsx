@@ -2,7 +2,7 @@ import React from "react";
 
 import ListItem from "./ListItem";
 
-const List = <T,>({ items, selectedItems, isDeleting, toggleSelect }) => {
+const List = <T,>({ items, selectedItems, isLoading, toggleSelect }) => {
   const handleToggleSelect = (item: T) => {
     toggleSelect(item);
   };
@@ -17,7 +17,7 @@ const List = <T,>({ items, selectedItems, isDeleting, toggleSelect }) => {
               (selected) => item.value === selected.value
             )}
             isLoading={
-              selectedItems?.find(({ id }) => id === item.id) && isDeleting
+              selectedItems?.find(({ id }) => id === item.id) && isLoading
             }
             id={item.id}
             value={item.value}
