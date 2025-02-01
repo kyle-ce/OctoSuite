@@ -1,5 +1,5 @@
 import React from "react";
-import Skeleton from "./List/Skeleton";
+import Skeleton from "./Skeleton";
 
 const Loading = ({
   isLoading,

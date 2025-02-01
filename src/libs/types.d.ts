@@ -4,7 +4,7 @@ interface IErrorDetails {
 }
 
 interface IRepoItem {
-  id: number;
+  id: string;
   value: string;
 }
 
@@ -16,7 +16,7 @@ interface IUserPlan {
 }
 
 interface IRepoItem {
-  id: number;
+  id: string;
   value: string;
 }
 

@@ -1,76 +1,88 @@
-import { useCallback, useState } from "react";
-import { deleteRepo, getAllRepositoriesNames } from "../api/repo";
+import { useState } from "react";
 import useThrottle from "./useThrottle";
+import { useToast } from "../contexts/ToastProvider";
+import { repository } from "../services/repositoryService";
 
-export const deleteSelectedRepos = async (
-  items: IRepoItem[],
-  auth: string,
-  user: string
-): Promise<{ success: string[]; errors: IErrorDetails[] }> => {
-  const success: string[] = [];
-  const errors: IErrorDetails[] = [];
-
-  const promises = items.map(({ value }) => deleteRepo(auth, user, value));
-  const settledPromises = await Promise.allSettled(promises);
-
-  settledPromises.forEach((result, i) => {
-    if (result.status === "fulfilled") {
-      success.push(items[i].value);
-    } else if (result.status === "rejected") {
-      errors.push({ repo: items[i].value, error: result.reason });
-    }
-  });
-
-  return { success, errors };
+type fetchDataResponse<T> = {
+  success: boolean;
+  item: T[];
 };
+type deleteDataResponse<T> = {
+  success: T[];
+  errors: { item: string; error: string };
+};
+// TODO: fix typing for hook
+interface IList<T> {
+  fetchDataHandler: () => Promise<fetchDataResponse<T>>;
+  deleteDataHandler: (selectedItems: T[]) => Promise<deleteDataResponse<T>>;
+}
 
-export const useList = <T extends IRepoItem>(auth, user) => {
+export const useList = <T extends repository>(
+  fetchDataHandler,
+  deleteDataHandler
+) => {
   const [selectedItems, setSelectedItems] = useState<T[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [data, setData] = useState<T[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [data, setData] = useState<T[]>([]);
+
+  const { addToast } = useToast();
+
+  const successDeletingToast = (success) => {
+    const toast = {
+      title: `Successfully Deleted ${success.length} Repositories`,
+      description: `\n${success.join("\n")}`,
+      variant: "success",
+    };
+    addToast(toast);
+  };
+  const failedDeletingToast = (errors) => {
+    const toast = {
+      title: `Failed Deleteing`,
+      description: `\n${errors
+        .map((err) => `${err.repo}: ${err.error}`)
+        .join("\n")}`,
+      variant: "alert",
+    };
+    addToast(toast);
+  };
 
   const fetchData = useThrottle(async () => {
     setIsLoading(true);
     try {
-      const names = await getAllRepositoriesNames(auth);
-      if (names) {
-        setData(names.map((name, i) => ({ value: name, id: i } as T)));
+      const data = await fetchDataHandler();
+      if (data.success) {
+        setData(data.items as T[]);
+      } else {
+        console.error(
+          "Toast data is undefined, do not delete current data though"
+        );
       }
     } catch (error) {
       console.error("Failed to fetch data:", error);
-      setData([]);
     } finally {
       setIsLoading(false);
     }
   }, 3000);
 
-  const deleteSelectedData = useCallback(
-    async (selectedItems) => {
-      setIsDeleting(true);
-      const { success, errors } = await deleteSelectedRepos(
-        selectedItems,
-        auth,
-        user
-      );
-      // display success/error messages
+  const deleteSelectedData = async (selectedItems: T[]) => {
+    setIsDeleting(true);
+    try {
+      const { success, errors } = await deleteDataHandler(selectedItems);
       if (success.length) {
-        alert(`Successfully deleted:\n${success.join("\n")}`);
+        successDeletingToast(success);
       }
       if (errors.length) {
-        alert(
-          `Failed to delete:\n${errors
-            .map((err) => `${err.repo}: ${err.error}`)
-            .join("\n")}`
-        );
+        failedDeletingToast(errors);
       }
-      // Remove deleted repos from available repos
+      // After toasting remove data
       setData((prev) => prev.filter(({ value }) => !success.includes(value)));
-      // Reset all selected items
+    } catch (error) {
+      console.error("Error in deleting", error);
+    } finally {
       setIsDeleting(false);
-    },
-    [auth, user]
-  );
+    }
+  };
 
   const toggleSelect = (item: T) => {
     setSelectedItems((prevSelected) =>

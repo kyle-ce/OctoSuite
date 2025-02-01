@@ -1,4 +1,5 @@
 import { Octokit } from "octokit";
+import { OCTOKIT_HEADER as headers } from "../libs/constants";
 
 // Octokit.js
 // https://github.com/octokit/core.js#readme
@@ -8,13 +9,8 @@ export const getAllRepositoriesNames = async (auth) => {
     auth,
   });
   try {
-    const { data } = await octokit.request("GET /user/repos", {
-      headers: {
-        "X-GitHub-Api-Version": "2022-11-28",
-      },
-    });
-    const names = data.map(({ name }) => name);
-    return names;
+    const { data } = await octokit.request("GET /user/repos", { headers });
+    if (data) return data.map(({ name }) => name);
   } catch (error) {
     console.error("Error fetching all repositories:", error);
     return [];
@@ -30,9 +26,7 @@ export const deleteRepo = async (auth, owner, repo) => {
       accept: "application/vnd.github+json",
       owner,
       repo,
-      headers: {
-        "X-GitHub-Api-Version": "2022-11-28",
-      },
+      headers,
     });
     return repo;
   } catch (error) {

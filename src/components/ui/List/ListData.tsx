@@ -2,26 +2,27 @@ import React from "react";
 
 import ListItem from "./ListItem";
 
-const List = ({ items, selectedItems, isDeleting, toggleSelect }) => {
-  const handleToggleSelect = (item: IRepoItem) => {
+const List = <T,>({ items, selectedItems, isLoading, toggleSelect }) => {
+  const handleToggleSelect = (item: T) => {
     toggleSelect(item);
   };
 
   return (
     <>
       <div className="max-h-screen pr-4 overflow-auto ">
-        {items.map((repo, i) => (
+        {items.map((item, i) => (
           <ListItem
             key={i}
-            checked={selectedItems?.some((item) => item.value === repo.value)}
+            checked={selectedItems?.some(
+              (selected) => item.value === selected.value
+            )}
             isLoading={
-              selectedItems?.find(({ value }) => value === repo.value) &&
-              isDeleting
+              selectedItems?.find(({ id }) => id === item.id) && isLoading
             }
-            id={i}
-            value={repo.value}
+            id={item.id}
+            value={item.value}
             onChange={({ target }) =>
-              handleToggleSelect({ id: i, value: target.value })
+              handleToggleSelect({ id: target.id, value: target.value } as T)
             }
           />
         ))}

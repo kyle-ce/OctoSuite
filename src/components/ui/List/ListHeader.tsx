@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { GoPersonFill, GoDotFill, GoSync } from "react-icons/go";
-import { useUser } from "../../../UserProvider";
+import { useUser } from "../../../contexts/UserProvider";
 
+// TODO: fix typing for props
 const ListHeader = ({ items, refresh, toggleSelectAll, clearSelection }) => {
   const { user } = useUser();
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {

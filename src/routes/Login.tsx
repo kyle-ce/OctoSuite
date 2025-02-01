@@ -1,26 +1,53 @@
 import React from "react";
 import { GoPasskeyFill } from "react-icons/go";
 import { Outlet } from "react-router";
-import { useUser } from "../UserProvider";
-import { getUser } from "../api/user";
+import { useUser } from "../contexts/UserProvider";
+import { useToast } from "../contexts/ToastProvider";
+import { fetchUserDetails } from "../services/userService";
 
 const Login = () => {
-  const { setUser, token, setToken, setIsLoggingin } = useUser();
+  const { token, setToken, updateUser, setIsLoggingin } = useUser();
+  const { addToast } = useToast();
 
+  const toastSuccessLogin = (user) => {
+    addToast({
+      title: "Successful",
+      description: `Successfully retrieved user details: ${user}`,
+      variant: "success",
+    });
+    console.info("Successfully retrieved user details:", user);
+  };
+  const toastFailedLogin = (data) => {
+    addToast({
+      title: "Failed to login",
+      description: `Failed to retreived user details`,
+      variant: "error",
+    });
+    console.info("Failed to retreived user details:", data);
+  };
   const handleChange = ({ target }) => {
     setToken(target.value);
   };
-  const handleSubmit = async (e: React.FormEvent) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!token) {
+      toastFailedLogin("Invalid token");
+      return;
+    }
     setIsLoggingin(true);
     try {
-      const { data } = await getUser(token);
-      setUser(data?.login || "");
-      setToken(data?.login ? token : "");
-      console.info("Successfully retrieved user details:", data?.login);
-    } catch {
-      setUser("");
-      setToken("");
+      const data = await fetchUserDetails(token);
+      if (data.success) {
+        updateUser(data.user as string, token);
+        toastSuccessLogin(data.user);
+      } else {
+        updateUser("", "");
+        toastFailedLogin(data);
+      }
+    } catch (error) {
+      updateUser("", "");
+      toastFailedLogin(error);
     } finally {
       setIsLoggingin(false);
     }
@@ -45,7 +72,7 @@ const Login = () => {
         <input
           type="password"
           placeholder="YOUR-PERSONAL-ACCESS-TOKEN"
-          value={token}
+          value={token as string}
           onChange={handleChange}
           className="w-full p-1 text-xs leading-5 border border-solid text-black/80"
         />
