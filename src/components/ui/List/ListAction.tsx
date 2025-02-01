@@ -6,20 +6,11 @@ import DeleteRepoModal from "../../DeleteRepoModal";
 const ListAction = ({ items, clearSelection, onSubmit }) => {
   const { user } = useUser();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isValid, setIsValid] = useState(false);
 
   const handleSubmit = async () => {
     setIsModalOpen(false);
     onSubmit(items);
     clearSelection();
-  };
-  const handleValidation = (value: string) => {
-    // validate input matches "{owner}" using regex
-    const regex = new RegExp(user, "i");
-    if (!regex.test(value)) {
-      return setIsValid(false);
-    }
-    return setIsValid(true);
   };
 
   return (
@@ -43,8 +34,6 @@ const ListAction = ({ items, clearSelection, onSubmit }) => {
       <DeleteRepoModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        isValid={isValid}
-        handleValidation={handleValidation}
         handleSubmit={handleSubmit}
         items={items}
         user={user}

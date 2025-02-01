@@ -31,7 +31,6 @@ const ToastProvider = ({ children }) => {
             variant={toast.variant}
             id={toast.id}
             show={toast.show}
-            onClose={() => removeToast(toast.id)}
             title={toast.title}
             description={toast.description}
           />

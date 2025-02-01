@@ -10,7 +10,6 @@ export interface IToast {
   variant?: "alert" | "error" | "info" | "success";
   show?: boolean;
   displayTime?: number;
-  onClose?: () => void;
 }
 
 const Toast = ({
@@ -19,7 +18,6 @@ const Toast = ({
   description,
   variant = "info",
   displayTime = TOAST.SHOW_TIME,
-  onClose,
 }: IToast) => {
   const [show, setShow] = useState(false);
 
@@ -113,10 +111,18 @@ const Toast = ({
   );
 
   const handleClick = (e) => {
+    // stop toast from animating off after time elapse
+
     if (timerRefShow.current) {
       clearTimeout(timerRefShow.current);
-      console.log(e.target);
     }
+  };
+  const animateToastOff = () => {
+    setShow(false);
+    timerRefRemove.current = setTimeout(
+      () => removeToast(id),
+      TOAST.ANIMATE_TIME
+    );
   };
 
   useEffect(() => {
@@ -127,11 +133,7 @@ const Toast = ({
     timerRefAllowRender.current = setTimeout(() => {
       setShow(true);
       timerRefShow.current = setTimeout(() => {
-        setShow(false);
-        timerRefRemove.current = setTimeout(
-          () => removeToast(id),
-          TOAST.ANIMATE_TIME
-        );
+        animateToastOff();
       }, displayTime);
     }, TOAST.MOUNT_DELAY);
     if (toastRef.current) {
@@ -186,7 +188,7 @@ const Toast = ({
           )}
         />
         <button
-          onClick={onClose}
+          onClick={animateToastOff}
           type="button"
           className="absolute opacity-0 group-hover:opacity-100 ease-out top-0 right-0 size-[15px] m-[-5px] gray-500 border text-[8px] leading-tight bg-gray-500 rounded-full text-black/50 hover:scale-110"
         >
