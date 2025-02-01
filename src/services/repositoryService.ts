@@ -1,4 +1,4 @@
-import { deleteRepo, getAllRepositoriesNames } from "../api/repo";
+import { deleteRepo, getAllRepositoriesNames } from "../api/repoistory";
 
 export type repository = { value: string; id: string };
 
@@ -11,19 +11,23 @@ interface IErrorDetails {
   item: string;
   error: string;
 }
-
+// The purpose of this service is to modularize the data fetching behavior
+// the getAllRepositoriesNames is a standard api call that returns data
+// the fetchRepositoriesData is a transformation layer to return specific
+// response my comopnent expects. Down the line if requirements change I will
+// always have the straight data from API call and I would make necissary changes
+// in this service to match with new requirements that way my components can just
+// simply call a service and my pattern will fetch teh data from api endpoint then
+// transform it special for component consumption
 export const fetchRepositoriesData = async (auth): Promise<IRepositoryData> => {
   try {
     const data = await getAllRepositoriesNames(auth);
-    if (data) {
-      // name is unique value! github does not allow you to name repo same names
-      const reposWithIds = data.map((name) => ({ value: name, id: name }));
-      return { success: true, items: reposWithIds };
-    }
-    return { success: false, error: "repository data undefined" };
+    // name is unique value! github does not allow you to name repo same names
+    const reposWithIds = data.map((name) => ({ value: name, id: name }));
+    return { success: true, items: reposWithIds };
   } catch (error) {
     console.error("Failed to fetch data:", error);
-    return { success: false, error: error };
+    return { success: false, error: error || "Failed to fetch repositories" };
   }
 };
 

@@ -143,6 +143,8 @@ const Toast = ({
       );
     }
     return () => {
+      // clear timeout references incase unmouting
+
       if (timerRefAllowRender.current) {
         clearTimeout(timerRefAllowRender.current);
       }

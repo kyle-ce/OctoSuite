@@ -8,13 +8,9 @@ export const getAllRepositoriesNames = async (auth) => {
   const octokit = new Octokit({
     auth,
   });
-  try {
-    const { data } = await octokit.request("GET /user/repos", { headers });
-    if (data) return data.map(({ name }) => name);
-  } catch (error) {
-    console.error("Error fetching all repositories:", error);
-    return [];
-  }
+  // if theres an error, let it bubble up to service
+  const { data } = await octokit.request("GET /user/repos", { headers });
+  return data.map(({ name }) => name);
 };
 
 export const deleteRepo = async (auth, owner, repo) => {

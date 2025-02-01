@@ -49,39 +49,33 @@ export const useList = <T extends repository>(
 
   const fetchData = useThrottle(async () => {
     setIsLoading(true);
-    try {
-      const data = await fetchDataHandler();
-      if (data.success) {
-        setData(data.items as T[]);
-      } else {
-        console.error(
-          "Toast data is undefined, do not delete current data though"
-        );
-      }
-    } catch (error) {
-      console.error("Failed to fetch data:", error);
-    } finally {
-      setIsLoading(false);
+    const data = await fetchDataHandler();
+    if (data.success) {
+      setData(data.items as T[]);
+    } else {
+      const error = {
+        title: "Failed to fetch data",
+        description: data.error.message,
+        variant: "error",
+      };
+      addToast(error);
+      console.error("Failed to fetch data");
     }
+    setIsLoading(false);
   }, 3000);
 
   const deleteSelectedData = async (selectedItems: T[]) => {
     setIsDeleting(true);
-    try {
-      const { success, errors } = await deleteDataHandler(selectedItems);
-      if (success.length) {
-        successDeletingToast(success);
-      }
-      if (errors.length) {
-        failedDeletingToast(errors);
-      }
-      // After toasting remove data
-      setData((prev) => prev.filter(({ value }) => !success.includes(value)));
-    } catch (error) {
-      console.error("Error in deleting", error);
-    } finally {
-      setIsDeleting(false);
+    const { success, errors } = await deleteDataHandler(selectedItems);
+    if (success.length) {
+      successDeletingToast(success);
     }
+    if (errors.length) {
+      failedDeletingToast(errors);
+    }
+    // After toasting remove data
+    setData((prev) => prev.filter(({ value }) => !success.includes(value)));
+    setIsDeleting(false);
   };
 
   const toggleSelect = (item: T) => {
