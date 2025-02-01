@@ -55,7 +55,7 @@ const Login = () => {
 
   return (
     // https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic
-    <div className="container mx-auto border border-solid border-red">
+    <div className="container mx-auto mt-4 bg-white border border-solid rounded-md shadow-xl">
       {/* Add landing page */}
       <form
         className="flex flex-col justify-start p-3 "
@@ -78,7 +78,7 @@ const Login = () => {
         />
         <button
           type="submit"
-          className="px-2 py-1 mt-2 text-xs text-white transition duration-100 bg-green-500 border border-green-500 border-solid rounded-sm hover:bg-green-300"
+          className="px-2 py-1 mt-2 text-xs font-semibold text-white transition duration-100 bg-green-500 border border-green-500 border-solid rounded-sm hover:bg-green-600"
         >
           Login
         </button>

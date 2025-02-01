@@ -124,7 +124,6 @@ const Toast = ({
     // After the delay, show the toast, then wait for the specified display time
     // Once the display time is over, start the toast's exit animation and finally remove it
 
-    console.log("toast id:", id);
     timerRefAllowRender.current = setTimeout(() => {
       setShow(true);
       timerRefShow.current = setTimeout(() => {

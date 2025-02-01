@@ -1,19 +1,25 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { GoAlert } from "react-icons/go";
 import Modal from "./ui/Modal";
 
-const DeleteRepoModal = ({
-  isOpen,
-  onClose,
-  handleValidation,
-  isValid,
-  handleSubmit,
-  items,
-  user,
-}) => {
+const DeleteRepoModal = ({ isOpen, onClose, handleSubmit, items, user }) => {
+  const [isValid, setIsValid] = useState(false);
+  const handleValidation = (value: string) => {
+    // validate input matches "owner of repo" using regex
+    const regex = new RegExp(user, "i");
+    if (!regex.test(value)) {
+      return setIsValid(false);
+    }
+    return setIsValid(true);
+  };
+  useEffect(() => {
+    // Remove validation if user closes modal
+
+    if (!isOpen) setIsValid(false);
+  }, [isOpen]);
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <h1 className="mb-2 text-base font-semibold text-center text-gray-800">
+      <h1 className="mb-2 text-base font-bold text-center text-gray-800">
         Delete Selected Repositories ({items?.length})
       </h1>
       <div className="flex flex-col gap-2 ">
@@ -45,7 +51,7 @@ This action cannot be undone
           className={`px-6 py-3 text-xs font-semibold rounded-md transition duration-200 ${
             !isValid
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-              : "text-white bg-red-500 hover:bg-red-400 focus:ring-2 focus:ring-red-500"
+              : "text-white bg-red-500 hover:bg-red-600 focus:ring-2 focus:ring-red-500 hover:scale-105"
           }`}
         >
           Delete
