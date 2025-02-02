@@ -51,11 +51,7 @@ const List = () => {
           toggleSelect={toggleSelect}
           isLoading={isDeleting}
         />
-        <ListAction
-          items={selectedItems}
-          clearSelection={clearSelection}
-          onSubmit={deleteSelectedData}
-        />
+        <ListAction items={selectedItems} onSubmit={deleteSelectedData} />
       </div>
     </Loading>
   );

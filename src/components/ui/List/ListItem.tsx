@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { RotatingLines } from "react-loader-spinner";
 
 // TODO: fix typiong for props
@@ -12,10 +12,10 @@ const ListItem = ({ value, id, onChange, isLoading, checked }) => {
           onChange={onChange}
           type="checkbox"
           className="p-1 text-xs leading-5 border border-solid text-black/80"
-          id={`repo-${id}`}
+          id={id}
           placeholder="https://github.com/user/repo.git"
         />
-        <label className="w-full text-sm text-black/80" htmlFor={`repo-${id}`}>
+        <label className="w-full text-sm text-black/80" htmlFor={id}>
           {value}
         </label>
 
