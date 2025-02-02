@@ -1,14 +1,27 @@
+import clsx from "clsx";
 import React, { useState } from "react";
 
 const Modal = ({ isOpen, onClose, children }) => {
-  if (!isOpen) return null;
+  // if (!isOpen) return null;
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+      className={clsx(
+        "fixed inset-0 flex items-center justify-center transition-opacity duration-300 bg-black/50 backdrop-blur-md",
+        {
+          "opacity-100 scale-100": isOpen,
+          "opacity-0 scale-0": !isOpen,
+        }
+      )}
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-lg p-8 bg-white rounded shadow-lg"
+        className={clsx(
+          "relative w-full max-w-lg p-8 bg-white rounded shadow-lg transition-transform duration-300",
+          {
+            "scale-100": isOpen,
+            "scale-0": !isOpen,
+          }
+        )}
         onClick={(e) => e.stopPropagation()}
       >
         <button

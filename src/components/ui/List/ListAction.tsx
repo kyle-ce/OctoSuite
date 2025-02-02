@@ -3,14 +3,13 @@ import { useUser } from "../../../contexts/UserProvider";
 import DeleteRepoModal from "../../DeleteRepoModal";
 
 // TODO: fix typing for props add style for element failed to delete
-const ListAction = ({ items, clearSelection, onSubmit }) => {
+const ListAction = ({ items, onSubmit }) => {
   const { user } = useUser();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleSubmit = async () => {
     setIsModalOpen(false);
     onSubmit(items);
-    clearSelection();
   };
 
   return (
