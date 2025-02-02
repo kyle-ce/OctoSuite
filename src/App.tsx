@@ -1,6 +1,6 @@
 import React from "react";
 import List from "./components/ui/List";
-import Login from "./routes/Login";
+import Login from "./routes/login";
 import { Routes, Route } from "react-router";
 import UserProvider from "./contexts/UserProvider";
 import ToastProvider from "./contexts/ToastProvider";
