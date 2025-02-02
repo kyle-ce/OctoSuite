@@ -67,15 +67,26 @@ export const useList = <T extends repository>(
   const deleteSelectedData = async (selectedItems: T[]) => {
     setIsDeleting(true);
     const { success, errors } = await deleteDataHandler(selectedItems);
+    // After toasting remove data
+    setData((prev) => prev.filter(({ value }) => !success.includes(value)));
+    setIsDeleting(false);
+    clearSelection();
     if (success.length) {
       successDeletingToast(success);
     }
     if (errors.length) {
       failedDeletingToast(errors);
     }
-    // After toasting remove data
-    setData((prev) => prev.filter(({ value }) => !success.includes(value)));
-    setIsDeleting(false);
+
+    //TEST DELETE
+    // new Promise((resolve) =>
+    //   setTimeout(() => {
+    //     console.log("data deleted");
+    //     setIsDeleting(false);
+    //     clearSelection();
+    //     return resolve;
+    //   }, 5000)
+    // );
   };
 
   const toggleSelect = (item: T) => {

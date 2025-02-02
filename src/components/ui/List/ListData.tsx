@@ -1,10 +1,15 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import ListItem from "./ListItem";
 
 const List = <T,>({ items, selectedItems, isLoading, toggleSelect }) => {
   const handleToggleSelect = (item: T) => {
     toggleSelect(item);
+  };
+
+  const isItemSelected = (itemId) => {
+    const found = selectedItems.find(({ id }) => id === itemId);
+    return !!found;
   };
 
   return (
@@ -16,9 +21,7 @@ const List = <T,>({ items, selectedItems, isLoading, toggleSelect }) => {
             checked={selectedItems?.some(
               (selected) => item.value === selected.value
             )}
-            isLoading={
-              selectedItems?.find(({ id }) => id === item.id) && isLoading
-            }
+            isLoading={isItemSelected(item.id) && isLoading}
             id={item.id}
             value={item.value}
             onChange={({ target }) =>
