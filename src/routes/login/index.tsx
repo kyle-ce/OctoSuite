@@ -1,9 +1,9 @@
 import React from "react";
 import { GoPasskeyFill } from "react-icons/go";
 import { Outlet } from "react-router";
-import { useUser } from "../contexts/UserProvider";
-import { useToast } from "../contexts/ToastProvider";
-import { fetchUserDetails } from "../services/userService";
+import { useUser } from "../../contexts/UserProvider";
+import { useToast } from "../../contexts/ToastProvider";
+import { fetchUserDetails } from "../../services/userService";
 
 const Login = () => {
   const { token, setToken, updateUser, setIsLoggingin } = useUser();
@@ -61,10 +61,10 @@ const Login = () => {
         className="flex flex-col justify-start p-3 "
         onSubmit={(e) => handleSubmit(e)}
       >
-        <h1 className="flex items-center gap-1 text-base font-semibold">
+        <h2 className="flex items-center gap-1 text-base font-semibold">
           <GoPasskeyFill />
           PAT
-        </h1>
+        </h2>
         <p className="mb-4 text-xs text-black/50">
           Enter your personal access token to get started
         </p>
