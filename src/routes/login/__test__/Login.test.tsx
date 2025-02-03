@@ -8,20 +8,21 @@ import Login from "..";
 describe("Login", () => {
   it("should render", () => {
     render(<Login />);
-    expect(screen.getByRole("heading", { name: /pat/i }));
+    expect(screen.getByRole("heading", { name: /pat/i })).toBeInTheDocument();
     expect(
       screen.getByText(/enter your personal access token to get started/i)
-    );
-    expect(screen.getByPlaceholderText(/your\-personal\-access\-token/i));
-    screen.getByRole("button", { name: /login/i });
+    ).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText(/your\-personal\-access\-token/i)
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /login/i })).toBeInTheDocument();
   });
   it("should be interactive", async () => {
     const user = userEvent.setup();
     render(<Login />);
     const input = screen.getByPlaceholderText(/your\-personal\-access\-token/i);
     // await user.click(input);
-    await user.type(input, "xxx{Enter}");
+    await user.type(input, "xxx");
     expect(input).toHaveValue("xxx");
-    screen.debug();
   });
 });
