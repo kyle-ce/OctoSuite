@@ -4,7 +4,7 @@ import { useToast } from "../../../contexts/ToastProvider";
 import { TOAST } from "../../../libs/constants";
 
 export interface IToast {
-  id?: string;
+  id?: number;
   title: string;
   description: string;
   variant?: "alert" | "error" | "info" | "success";

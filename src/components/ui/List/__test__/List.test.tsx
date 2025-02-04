@@ -4,41 +4,190 @@ import { screen, waitFor } from "@testing-library/react";
 import { render } from "../../../../libs/test-utils";
 import List from "..";
 import userEvent from "@testing-library/user-event";
+import UserProvider from "../../../../contexts/UserProvider";
+import ToastProvider from "../../../../contexts/ToastProvider";
+
+const preloadedUserState = {
+  user: "kyle-ce",
+  token: "xxx",
+  isLoggingin: false,
+};
+
+const invalidUser = {
+  user: "",
+  token: "",
+  isLoggingin: false,
+};
 
 describe("List", () => {
-  it("should render", async () => {
-    render(<List />);
-    await waitFor(() =>
-      expect(
-        screen.getByRole("heading", { name: /active repositories/i })
-      ).toBeInTheDocument()
+  it("should render the list with active repositories", async () => {
+    render(
+      <UserProvider initalUser={preloadedUserState}>
+        <List />
+      </UserProvider>
     );
-    await waitFor(() => expect(screen.getByText(/test1/i)).toBeInTheDocument());
-    await waitFor(() => expect(screen.getByText(/test2/i)).toBeInTheDocument());
+    // ✅ Wait for the heading to appear (indicating the component has loaded)
+    const heading = await screen.findByRole("heading", {
+      name: /active repositories/i,
+    });
+    expect(heading).toBeInTheDocument();
+
+    // ✅ Verify repositories are rendered
+    expect(
+      await screen.findByText(/test-successfully-delete-this-repo/i)
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByText(/test-fail-delete-this-repo/i)
+    ).toBeInTheDocument();
   });
-  it("should show modal", async () => {
+
+  it("should delete a repository", async () => {
     const user = userEvent.setup();
-    render(<List />);
-
-    // select test1
-    const test1Input = await waitFor(() =>
-      screen.getByRole("checkbox", {
-        name: /test1/i,
-      })
+    render(
+      <ToastProvider>
+        <UserProvider initalUser={preloadedUserState}>
+          <List />
+        </UserProvider>
+      </ToastProvider>
     );
-    await user.click(test1Input);
-    expect(test1Input).toBeChecked();
 
-    // click delete to show modal
-    const button = screen.getByRole("button", { name: /delete \(1\)/i });
-    await user.click(button);
+    // ✅ Select "test-successfully-delete-this-repo" checkbox
+    const test1Checkbox = await screen.findByRole("checkbox", {
+      name: /test-successfully-delete-this-repo/i,
+    });
+    await user.click(test1Checkbox);
+    expect(test1Checkbox).toBeChecked();
 
-    // verify modal in document
-    const modal = screen.getByRole("heading", {
+    // ✅ Click "Delete (1)" button to open modal
+    const deleteButton = screen.getByRole("button", { name: /delete \(1\)/i });
+    await user.click(deleteButton);
+
+    // ✅ Verify modal appears
+    const modalHeading = await screen.findByRole("heading", {
       name: /delete selected repositories \(1\)/i,
     });
-    const validation = screen.getByRole("textbox");
-    expect(modal).toBeInTheDocument();
-    expect(validation).toBeInTheDocument();
+    const validationInput = screen.getByRole("textbox");
+    expect(modalHeading).toBeInTheDocument();
+    expect(validationInput).toBeInTheDocument();
+
+    // ✅ Type username in validation input
+    await user.type(validationInput, "kyle-ce");
+
+    // ✅ Click final "Delete" button
+    const confirmDeleteButton = screen.getByRole("button", { name: "Delete" });
+    await user.click(confirmDeleteButton);
+
+    // ✅ Verify toast notification appears
+    await screen.findByRole("heading", {
+      name: /Successfully Deleted 1 Repositories/i,
+    });
+
+    // ✅ Verify "test1" checkbox is removed
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("checkbox", {
+          name: /test-successfully-delete-this-repo/i,
+        })
+      ).not.toBeInTheDocument()
+    );
+  });
+  it("should select all repositories and clear selected all", async () => {
+    const user = userEvent.setup();
+    render(
+      <ToastProvider>
+        <UserProvider initalUser={preloadedUserState}>
+          <List />
+        </UserProvider>
+      </ToastProvider>
+    );
+
+    // ✅ Find all checkboxes
+    let checkboxes = await screen.findAllByRole("checkbox");
+    const selectAllCheckbox = checkboxes.find((el) => el.id === "select-all");
+
+    // verify select all box exists to prevent type errors
+    if (!selectAllCheckbox) {
+      throw new Error("Select All checkbox not found");
+    }
+
+    // ✅ Click "Select All" checkbox
+    await user.click(selectAllCheckbox);
+    expect(selectAllCheckbox).toBeChecked();
+
+    // ✅ Verify all checkboxes are checked
+    checkboxes.forEach((checkbox) => {
+      expect(checkbox).toBeChecked();
+    });
+
+    // ✅ Click "Select All" again checkbox to clear all selected
+    await user.click(selectAllCheckbox);
+    expect(selectAllCheckbox).not.toBeChecked();
+
+    // ✅ Verify all checkboxes are checked
+    checkboxes.forEach((checkbox) => {
+      expect(checkbox).not.toBeChecked();
+    });
+  });
+  it("should fail to delete repository", async () => {
+    const user = userEvent.setup();
+    render(
+      <ToastProvider>
+        <UserProvider initalUser={preloadedUserState}>
+          <List />
+        </UserProvider>
+      </ToastProvider>
+    );
+    // ✅ Select "test-fail-delete-this-repo" checkbox
+    const failRepo = await screen.findByRole("checkbox", {
+      name: /test-fail-delete-this-repo/i,
+    });
+    await user.click(failRepo);
+    expect(failRepo).toBeChecked();
+
+    // ✅ Click "Delete (1)" button to open modal
+    const deleteButton = screen.getByRole("button", { name: /delete \(1\)/i });
+    await user.click(deleteButton);
+
+    // ✅ Verify modal appears
+    const modalHeading = await screen.findByRole("heading", {
+      name: /delete selected repositories \(1\)/i,
+    });
+    const validationInput = screen.getByRole("textbox");
+    expect(modalHeading).toBeInTheDocument();
+    expect(validationInput).toBeInTheDocument();
+
+    // ✅ Type username in validation input
+    await user.type(validationInput, "kyle-ce");
+
+    // ✅ Click final "Delete" button
+    const confirmDeleteButton = screen.getByRole("button", { name: "Delete" });
+    await user.click(confirmDeleteButton);
+
+    // ✅ Verify toast notification appears
+    await screen.findByRole("heading", { name: /failed deleteing/i });
+
+    // ✅ Verify "test1" checkbox is removed
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("checkbox", {
+          name: /test-fail-delete-this-repo/i,
+        })
+      ).toBeInTheDocument()
+    );
+  });
+  it("should not load list of repositories if user is invalid", async () => {
+    render(
+      <UserProvider initalUser={invalidUser}>
+        <List />
+      </UserProvider>
+    );
+
+    // ✅ try to find header of list (indicating user creds loaded repositories)
+    const heading = screen.queryByRole("heading", {
+      name: /active repositories/i,
+    });
+
+    // ✅ expect not to find it
+    expect(heading).not.toBeInTheDocument();
   });
 });

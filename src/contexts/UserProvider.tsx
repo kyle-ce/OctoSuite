@@ -7,12 +7,14 @@ interface IUserContext {
   isLoggingin: boolean;
   setIsLoggingin: (isLoggingin: boolean) => void;
 }
-const UserContext = createContext<IUserContext | undefined>(undefined);
+export const UserContext = createContext<IUserContext | undefined>(undefined);
 
-const UserProvider = ({ children }) => {
-  const [user, setUser] = useState("");
-  const [token, setToken] = useState<string>("");
-  const [isLoggingin, setIsLoggingin] = useState(false);
+const intitUser = { user: "", token: "", isLoggingin: false };
+
+const UserProvider = ({ children, initalUser = intitUser }) => {
+  const [user, setUser] = useState(initalUser.user);
+  const [token, setToken] = useState<string>(initalUser.token);
+  const [isLoggingin, setIsLoggingin] = useState(intitUser.isLoggingin);
 
   const updateUser = (login, token) => {
     setUser(login);
