@@ -6,8 +6,11 @@ import List from "..";
 import userEvent from "@testing-library/user-event";
 import UserProvider from "../../../../contexts/UserProvider";
 import ToastProvider from "../../../../contexts/ToastProvider";
+import { server } from "../../../../mocks/server";
+import { http } from "msw";
+import { HttpResponse } from "msw";
 
-const preloadedUserState = {
+const validUser = {
   user: "kyle-ce",
   token: "xxx",
   isLoggingin: false,
@@ -22,7 +25,7 @@ const invalidUser = {
 describe("List", () => {
   it("should render the list with active repositories", async () => {
     render(
-      <UserProvider initalUser={preloadedUserState}>
+      <UserProvider initalUser={validUser}>
         <List />
       </UserProvider>
     );
@@ -45,7 +48,7 @@ describe("List", () => {
     const user = userEvent.setup();
     render(
       <ToastProvider>
-        <UserProvider initalUser={preloadedUserState}>
+        <UserProvider initalUser={validUser}>
           <List />
         </UserProvider>
       </ToastProvider>
@@ -95,7 +98,7 @@ describe("List", () => {
     const user = userEvent.setup();
     render(
       <ToastProvider>
-        <UserProvider initalUser={preloadedUserState}>
+        <UserProvider initalUser={validUser}>
           <List />
         </UserProvider>
       </ToastProvider>
@@ -123,16 +126,22 @@ describe("List", () => {
     await user.click(selectAllCheckbox);
     expect(selectAllCheckbox).not.toBeChecked();
 
-    // ✅ Verify all checkboxes are checked
+    // ✅ Verify all checkboxes are not checked
     checkboxes.forEach((checkbox) => {
       expect(checkbox).not.toBeChecked();
     });
+    // ✅ Verify checkboxes are selectable and unselectable
+    const checkbox = checkboxes[1];
+    await user.click(checkboxes[1]);
+    expect(checkbox).toBeChecked();
+    await user.click(checkboxes[1]);
+    expect(checkbox).not.toBeChecked();
   });
   it("should fail to delete repository", async () => {
     const user = userEvent.setup();
     render(
       <ToastProvider>
-        <UserProvider initalUser={preloadedUserState}>
+        <UserProvider initalUser={validUser}>
           <List />
         </UserProvider>
       </ToastProvider>
@@ -189,5 +198,29 @@ describe("List", () => {
 
     // ✅ expect not to find it
     expect(heading).not.toBeInTheDocument();
+  });
+  it("should fail to fetch repositories", async () => {
+    // ✅ change mock response so it returns a fail 400 status
+    server.use(
+      http.get("https://api.github.com/user/repos", () => {
+        console.log("🚨 MSW: Simulating Server Error");
+        return HttpResponse.json({ message: "Mock fail" }, { status: 400 });
+      })
+    );
+    render(
+      <UserProvider initalUser={validUser}>
+        <List />
+      </UserProvider>
+    );
+
+    // ✅ Verify 0 repositorys were returned
+    let subheading = await screen.findByText(/kyle\-ce 0 repositories/i);
+    expect(subheading).toBeInTheDocument();
+
+    // ✅ expect to find error banner for failed fetch
+    let error = await screen.findByRole("heading", {
+      name: /failed to fetch data/i,
+    });
+    expect(error).toBeInTheDocument();
   });
 });

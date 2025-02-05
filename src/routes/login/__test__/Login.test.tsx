@@ -8,14 +8,7 @@ import ToastProvider from "../../../contexts/ToastProvider";
 import UserProvider from "../../../contexts/UserProvider";
 import List from "../../../components/ui/List";
 import { http, HttpResponse } from "msw";
-import { setupServer } from "msw/node";
-import { beforeAll, afterEach, afterAll } from "vitest";
-
-const server = setupServer(
-  http.get("https://api.github.com/user", () => {
-    return HttpResponse.json(null, { status: 200 });
-  })
-);
+import { server } from "../../../mocks/server";
 
 describe("Login", () => {
   it("should render", () => {
@@ -69,29 +62,15 @@ describe("Login", () => {
     });
     expect(error).toBeInTheDocument();
   });
-  it("should fail fetching user details ", async () => {
-    // ✅ change mock response so it returns a fail 500 status
-    server.resetHandlers();
+  it("should fail login", async () => {
+    // ✅ change mock response so it returns a fail 400 status
     server.use(
       http.get("https://api.github.com/user", () => {
-        // const controller = new AbortController();
-        console.log("Intercepted by MSW!");
-        return new HttpResponse(null, { status: 500 });
-        // fetch automatically retries 3 times every 10s
-        // this is not ideal for testing as this will hang test suite
-        // aborting request mid flight will make request fail in 10ms
-        // server.resetHandlers();
-        // setTimeout(() => controller.abort(), 100);
-        // return new Promise((_, reject) => {
-        //   reject(new Error("Request aborted"));
-        // });
-
-        // return new HttpResponse(null, { status: 500 });
+        console.log("🚨 MSW: Simulating Server Error");
+        return HttpResponse.json({ message: "Mock fail" }, { status: 400 });
       })
     );
-    server.events.on("request:start", (req) => {
-      console.log("Request started:", req);
-    });
+
     const user = userEvent.setup();
     render(
       <ToastProvider>

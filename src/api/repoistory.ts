@@ -26,7 +26,7 @@ export const deleteRepo = async (auth, owner, repo) => {
     });
     return repo;
   } catch (error) {
-    console.error("Error deleting repository: ", error);
+    // console.error("Error deleting repository: ", error);
     throw new Error(error.message);
   }
 };

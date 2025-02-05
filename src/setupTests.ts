@@ -1,7 +1,12 @@
 import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
-import { server } from "./mocks/server"; // Import your MSW setup
-import { beforeAll, afterEach, afterAll } from "vitest"; // If using Jest, replace with `jest`
+import { server } from "./mocks/server";
+import { beforeAll, afterEach, afterAll } from "vitest";
+import { vi } from "vitest";
+
+// server.events.on("response:mocked", ({ request, response }) => {
+//   console.log("💡 MSW mocked:", request.url, response.status);
+// });
 
 // Start the server before all tests
 beforeAll(() => server.listen());

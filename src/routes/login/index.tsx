@@ -36,21 +36,16 @@ const Login = () => {
       return;
     }
     setIsLoggingin(true);
-    try {
-      const data = await fetchUserDetails(token);
-      if (data.success) {
-        updateUser(data.user as string, token);
-        toastSuccessLogin(data.user);
-      } else {
-        updateUser("", "");
-        toastFailedLogin(data);
-      }
-    } catch (error) {
+
+    const data = await fetchUserDetails(token);
+    if (data.success) {
+      updateUser(data.user as string, token);
+      toastSuccessLogin(data.user);
+    } else {
       updateUser("", "");
-      toastFailedLogin(error);
-    } finally {
-      setIsLoggingin(false);
+      toastFailedLogin(data);
     }
+    setIsLoggingin(false);
   };
 
   return (
