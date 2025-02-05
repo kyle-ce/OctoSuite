@@ -1,4 +1,3 @@
-// src/mocks/handlers.js
 import { http, HttpResponse } from "msw";
 
 const mockUserData = {
@@ -39,6 +38,12 @@ const mockUserData = {
 };
 
 const mockRepositoryData = [
+  {
+    name: "test-successfully-delete-this-repo",
+  },
+  {
+    name: "test-fail-delete-this-repo",
+  },
   {
     id: 783320995,
     node_id: "R_kgDOLrCHow",
@@ -2352,9 +2357,21 @@ const mockRepositoryData = [
 
 export const handlers = [
   http.get("https://api.github.com/user", () => {
-    return HttpResponse.json(mockUserData);
+    return HttpResponse.json(mockUserData, { status: 200 });
   }),
   http.get("https://api.github.com/user/repos", () => {
     return HttpResponse.json(mockRepositoryData);
   }),
+  http.delete(
+    "https://api.github.com/repos/kyle-ce/test-successfully-delete-this-repo",
+    () => {
+      return HttpResponse.json({}, { status: 200 });
+    }
+  ),
+  http.delete(
+    "https://api.github.com/repos/kyle-ce/test-fail-delete-this-repo",
+    () => {
+      return HttpResponse.json({}, { status: 404 });
+    }
+  ),
 ];

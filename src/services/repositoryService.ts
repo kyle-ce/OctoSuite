@@ -26,7 +26,7 @@ export const fetchRepositoriesData = async (auth): Promise<IRepositoryData> => {
     const reposWithIds = data.map((name) => ({ value: name, id: name }));
     return { success: true, items: reposWithIds };
   } catch (error) {
-    console.error("Failed to fetch data:", error);
+    // console.error("Failed to fetch data:", error);
     return { success: false, error: error || "Failed to fetch repositories" };
   }
 };

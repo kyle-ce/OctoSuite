@@ -5,11 +5,27 @@ interface IToastContext {
   addToast: (prev) => void;
   removeToast: (id) => void;
 }
+export interface IToast {
+  id: number;
+  title: string;
+  description: string;
+  variant: "alert" | "error" | "info";
+  show: boolean;
+  displayTime: number;
+}
+interface IToastProvider {
+  children: React.ReactNode;
+  initialState?: { toasts: IToast[] | [] };
+}
 
 const ToastContext = createContext<IToastContext | undefined>(undefined);
+const initState = { toasts: [] };
 
-const ToastProvider = ({ children }) => {
-  const [toasts, setToasts] = useState<any[]>([]);
+const ToastProvider = ({
+  children,
+  initialState = initState,
+}: IToastProvider) => {
+  const [toasts, setToasts] = useState<any[]>(initialState.toasts);
 
   const addToast = (toast) => {
     // lazy id
@@ -33,6 +49,7 @@ const ToastProvider = ({ children }) => {
             show={toast.show}
             title={toast.title}
             description={toast.description}
+            displayTime={toast?.displayTime}
           />
         ))}
       </div>

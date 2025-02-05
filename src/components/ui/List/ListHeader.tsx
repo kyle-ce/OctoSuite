@@ -19,7 +19,7 @@ const ListHeader = ({ items, refresh, toggleSelectAll, clearSelection }) => {
       <div className="flex items-center justify-between pr-2 mt-2">
         <div className="flex items-center gap-4 ">
           <input
-            id="selectall"
+            id="select-all"
             type="checkbox"
             onChange={handleSelectAll}
           ></input>
