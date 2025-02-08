@@ -10,9 +10,8 @@ function App() {
     <UserProvider>
       <ToastProvider>
         <Routes>
-          <Route path="/" element={<Login />}>
-            <Route index element={<List />} />
-          </Route>
+          <Route path="/" element={<Login />} />
+          <Route path="/repositories" element={<List />} />
         </Routes>
       </ToastProvider>
     </UserProvider>

@@ -1,6 +1,6 @@
 import React from "react";
 import { GoPasskeyFill } from "react-icons/go";
-import { Outlet } from "react-router";
+import { Outlet, useNavigate } from "react-router";
 import { useUser } from "../../contexts/UserProvider";
 import { useToast } from "../../contexts/ToastProvider";
 import { fetchUserDetails } from "../../services/userService";
@@ -8,6 +8,8 @@ import { fetchUserDetails } from "../../services/userService";
 const Login = () => {
   const { token, setToken, updateUser, setIsLoggingin } = useUser();
   const { addToast } = useToast();
+
+  const navigate = useNavigate();
 
   const toastSuccessLogin = (user) => {
     addToast({
@@ -41,6 +43,7 @@ const Login = () => {
     if (data.success) {
       updateUser(data.user as string, token);
       toastSuccessLogin(data.user);
+      navigate("/repositories");
     } else {
       updateUser("", "");
       toastFailedLogin(data);
@@ -50,7 +53,7 @@ const Login = () => {
 
   return (
     // https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic
-    <div className="container mx-auto mt-4 bg-white border border-solid rounded-md shadow-xl">
+    <div className="container max-w-md mx-auto mt-4 bg-white border border-solid rounded-md shadow-xl">
       {/* Add landing page */}
       <form
         className="flex flex-col justify-start p-3 "

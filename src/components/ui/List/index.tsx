@@ -9,11 +9,14 @@ import {
   deleteRepositories,
   fetchRepositoriesData,
 } from "../../../services/repositoryService";
+import { useNavigate } from "react-router";
 
 const List = () => {
   const fetchDataHandler = () => fetchRepositoriesData(auth);
   const deleteDataHandler = (selectedItems) =>
     deleteRepositories(selectedItems, auth, user);
+
+  const navigate = useNavigate();
 
   const { user, token: auth, isLoggingin } = useUser();
   const {
@@ -29,16 +32,20 @@ const List = () => {
   } = useList(fetchDataHandler, deleteDataHandler);
 
   useEffect(() => {
-    if (user) {
-      fetchData();
+    if (!user) {
+      navigate("/");
     }
+    fetchData();
   }, [user, isLoggingin]);
-  if (!user && !isLoggingin) {
-    return;
-  }
+  // if (!user) {
+
+  // }
   return (
     <Loading isLoading={isLoading || isLoggingin}>
-      <div className="container w-full p-3 px-2 mx-auto" id="repos">
+      <div
+        className="container w-full max-w-lg p-3 px-2 mx-auto bg-white rounded-lg shadow-lg"
+        id="repos"
+      >
         <ListHeader
           items={data}
           refresh={fetchData}
