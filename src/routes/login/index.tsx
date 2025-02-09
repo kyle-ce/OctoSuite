@@ -56,14 +56,16 @@ const Login = () => {
     <div className="container flex items-center justify-center h-screen mx-auto">
       {/* Add landing page */}
       <form
-        className="flex flex-col max-w-sm p-3 bg-white border border-solid rounded-md shadow-2xl md:max-w-xl border-black/50"
+        className="flex flex-col max-w-sm p-3 bg-white border-2 border-solid rounded-md shadow-2xl md:max-w-xl border-black/50"
         onSubmit={(e) => handleSubmit(e)}
       >
         <h2 className="flex items-center gap-1 text-base font-bold text-purple-600 md:text-xl">
           <GoPasskeyFill />
-          PAT
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600">
+            Login to OctoSuite
+          </span>
         </h2>
-        <p className="mb-2 text-xs font-semibold text-gray-800 md:text-base ">
+        <p className="mb-2 text-xs font-semibold text-gray-700 md:text-base ">
           Enter your personal access token to get started
         </p>
         <label className="text-xs text-gray-500 md:text-sm">
@@ -74,7 +76,7 @@ const Login = () => {
           placeholder="YOUR-PERSONAL-ACCESS-TOKEN"
           value={token as string}
           onChange={handleChange}
-          className="w-full p-1 text-xs border border-solid rounded-sm outline-none md:text-sm focus:ring-1 focus:ring-purple-300 text-black/80"
+          className="w-full p-1 text-xs tracking-wider border border-solid rounded-sm outline-none md:text-sm focus:ring-1 focus:ring-purple-300 text-black/80"
         />
         <button type="submit" className="mt-2 button-primary ">
           Login
