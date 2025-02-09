@@ -53,31 +53,30 @@ const Login = () => {
 
   return (
     // https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic
-    <div className="container max-w-md mx-auto mt-4 bg-white border border-solid rounded-md shadow-xl">
+    <div className="container flex items-center justify-center h-screen mx-auto">
       {/* Add landing page */}
       <form
-        className="flex flex-col justify-start p-3 "
+        className="flex flex-col max-w-sm p-3 bg-white border border-solid rounded-md shadow-2xl md:max-w-xl border-black/50"
         onSubmit={(e) => handleSubmit(e)}
       >
-        <h2 className="flex items-center gap-1 text-base font-semibold">
+        <h2 className="flex items-center gap-1 text-base font-bold text-purple-600 md:text-xl">
           <GoPasskeyFill />
           PAT
         </h2>
-        <p className="mb-4 text-xs text-black/50">
+        <p className="mb-2 text-xs font-semibold text-gray-800 md:text-base ">
           Enter your personal access token to get started
         </p>
-        {/* <label>PAT</label> */}
+        <label className="text-xs text-gray-500 md:text-sm">
+          Personal Access Token
+        </label>
         <input
           type="password"
           placeholder="YOUR-PERSONAL-ACCESS-TOKEN"
           value={token as string}
           onChange={handleChange}
-          className="w-full p-1 text-xs leading-5 border border-solid text-black/80"
+          className="w-full p-1 text-xs border border-solid rounded-sm outline-none md:text-sm focus:ring-1 focus:ring-purple-300 text-black/80"
         />
-        <button
-          type="submit"
-          className="px-2 py-1 mt-2 text-xs font-semibold text-white transition duration-100 bg-green-500 border border-green-500 border-solid rounded-sm hover:bg-green-600"
-        >
+        <button type="submit" className="mt-2 button-primary ">
           Login
         </button>
       </form>
